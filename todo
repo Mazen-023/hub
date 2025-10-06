@@ -1,0 +1,42 @@
+# DevHub Project - Development Todo List
+
+## 📋 Project Tasks
+
+## 📍 Status Legend
+- ✅ Completed
+- 🔄 In Progress  
+- ❌ Not Started
+
+### ✅ Phase 1: Backend Development
+- [✅] **1. Create Models**
+  - [✅] Accounts app models
+  - [✅] Projects app models
+
+### 🧪 Phase 2: Testing
+- [🔄] **2. Write Tests**
+  - [🔄] Tests for accounts app
+  - [🔄] Tests for projects app
+
+### 🔄 Phase 3: CI/CD
+- [❌] **3. Setup GitHub Actions**
+  - [❌] Configure continuous integration
+  - [❌] Setup automated testing
+
+### 🌐 Phase 4: Web Layer
+- [❌] **4. Create URLs**
+  - [❌] URL patterns for accounts
+  - [❌] URL patterns for projects
+
+- [❌] **5. Create Views**
+  - [❌] Account views (login, register, profile)
+  - [❌] Project views (CRUD operations)
+
+- [❌] **6. Create Templates**
+  - [❌] Base template
+  - [❌] Account templates
+  - [❌] Project templates
+
+---
+
+## 📊 Progress Tracker
+**Current Progress:** 1/6 tasks completed
