@@ -1,0 +1,32 @@
+{% extends "projects/layout.html" %}
+{% load static %}
+
+{% block title %} Add new project {% endblock %}
+
+{% block main %}
+    <h2>Add New Project</h2>
+    <form action="{% url 'projects:add' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="video" class="form-label">Video URL</label>
+            <input type="url" class="form-control" id="video" name="video">
+        </div>
+        <div class="mb-3">
+            <label for="file" class="form-label">README File</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".md">
+        </div>
+        <div class="mb-3">
+            <label for="tech" class="form-label">Technologies (comma-separated)</label>
+            <input type="text" class="form-control" id="tech" name="tech">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Project</button>
+    </form>
+{% endblock %}
