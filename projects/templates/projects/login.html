@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block main %}
-    <form action="{% url 'accounts:login' %}" method="post" class="container">
+    <form action="{% url 'projects:login' %}" method="post" class="container">
         {% csrf_token %}
         <div class="mb-3">
             <label for="exampleInputUsername" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" id="exampleInputUsername">
+            <input autofocus type="text" name="username" class="form-control" id="exampleInputUsername">
         </div>
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Password</label>
@@ -14,7 +14,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         <div class="mt-4">
-            Don't have an account? <a href="{% url 'accounts:register' %}">Register here.</a>
+            Don't have an account? <a href="{% url 'projects:register' %}">Register here.</a>
         </div>
     </form>
 {% endblock %}

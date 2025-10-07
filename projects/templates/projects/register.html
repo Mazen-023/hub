@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block main %}
-    <form action="{% url 'accounts:register' %}" method="post" class="container">
+    <form action="{% url 'projects:register' %}" method="post" class="container">
         {% csrf_token %}
         <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Email address</label>
@@ -23,7 +23,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         <div class="mt-4">
-            Already have an account? <a href="{% url 'accounts:login' %}">Login here.</a>
+            Already have an account? <a href="{% url 'projects:login' %}">Login here.</a>
         </div>
     </form>
 {% endblock %}

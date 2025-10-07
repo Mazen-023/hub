@@ -26,17 +26,17 @@
                                 <a class="nav-link" href="{% url 'projects:add' %}">Add project</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'accounts:dashboard' user.username %}">Dashboard</a>
+                                <a class="nav-link" href="{% url 'projects:dashboard' user.username %}">Dashboard</a>
                             </li>
                         </ul>
                     {% else %}
                     {% endif %}
                     <ul class="navbar-nav ms-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:logout' %}">Logout</a></li>
                         {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:register' %}">Register</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:login' %}">Login</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:register' %}">Register</a></li>
                         {% endif %}
                     </ul>
                 </div>
