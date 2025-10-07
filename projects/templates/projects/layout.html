@@ -9,6 +9,8 @@
         <title>
             {% block title %}Developer Hub{% endblock %}
         </title>
+        {% block script %}
+        {% endblock %}
     </head>
     <body>
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -19,14 +21,14 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     {% if user.is_authenticated %}
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'projects:add' %}">Add project</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a>
-                        </li>
-                    </ul>
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'projects:add' %}">Add project</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'accounts:dashboard' user.username %}">Dashboard</a>
+                            </li>
+                        </ul>
                     {% else %}
                     {% endif %}
                     <ul class="navbar-nav ms-auto">

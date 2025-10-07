@@ -4,6 +4,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from projects.models import Project
+
 from .models import User
 
 
@@ -63,5 +65,20 @@ def register(request):
         return render(request, "accounts/register.html")
 
 
-def dashboard(request):
-    return render(request, "accounts/dashboard.html")
+def dashboard(request, username):
+    # Get user object
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return render(request, "accounts/dashbaord.html", {
+            "message": "user is not exist"
+        })
+    
+    # Get user projects
+    projects = Project.objects.filter(owner=user)
+
+    # Render user dashboard
+    return render(request, "accounts/dashboard.html", {
+        "projects": projects,
+        "profile": user.serializer()
+    })

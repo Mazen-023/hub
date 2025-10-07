@@ -6,5 +6,5 @@ app_name = "projects"
 urlpatterns = [
     path("", views.index, name="index"),
     path("add", views.add, name="add"),
-    path("project/<int:id>", views.project_detial, name="project_detial"),
+    path("project_detail/<int:id>", views.project_detail, name="project_detail"),
 ]
