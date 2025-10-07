@@ -4,54 +4,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0002_alter_project_file'),
+        ("projects", "0002_alter_project_file"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='project',
-            old_name='user',
-            new_name='owner',
+            model_name="project",
+            old_name="user",
+            new_name="owner",
         ),
         migrations.RenameField(
-            model_name='project',
-            old_name='video',
-            new_name='video_url',
+            model_name="project",
+            old_name="video",
+            new_name="video_url",
         ),
         migrations.RemoveField(
-            model_name='project',
-            name='file',
+            model_name="project",
+            name="file",
         ),
         migrations.AddField(
-            model_name='project',
-            name='erd_url',
-            field=models.ImageField(blank=True, upload_to=''),
+            model_name="project",
+            name="erd_url",
+            field=models.ImageField(blank=True, upload_to=""),
         ),
         migrations.AddField(
-            model_name='project',
-            name='is_public',
+            model_name="project",
+            name="is_public",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='project',
-            name='key_learning',
+            model_name="project",
+            name="key_learning",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='project',
-            name='objectives',
+            model_name="project",
+            name="objectives",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='project',
-            name='overview',
+            model_name="project",
+            name="overview",
             field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
-            model_name='project',
-            name='views',
+            model_name="project",
+            name="views",
             field=models.IntegerField(default=0),
         ),
     ]

@@ -3,23 +3,22 @@ from django.test import TestCase
 from accounts.models import User
 from .models import Project, Tech
 
+
 # Create your tests here.
 class ProjectTestCase(TestCase):
-    
     def setUp(self):
-        
-        # Create user 
+        # Create user
         foo = User.objects.create(username="foo")
         bar = User.objects.create(username="bar")
 
         # Create project
-        project = Project.objects.create(owner = foo, title = "test project 1")
+        project = Project.objects.create(owner=foo, title="test project 1")
         Project.objects.create(
-            owner = bar, 
-            title = "test project 2",
-            views = 50,
-            description = "project 2 description",
-            overview = "project 2 overview"
+            owner=bar,
+            title="test project 2",
+            views=50,
+            description="project 2 description",
+            overview="project 2 overview",
         )
 
         # Create Tech

@@ -2,6 +2,7 @@ from django.db import models
 
 from accounts.models import User
 
+
 # Create your models here.
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
@@ -18,7 +19,7 @@ class Project(models.Model):
 
     def __str__(self):
         return f"project: {self.title}, created by {self.owner.username}."
-    
+
 
 class Tech(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tech")
