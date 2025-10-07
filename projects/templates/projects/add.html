@@ -12,6 +12,10 @@
             <input type="text" class="form-control" id="title" name="title" required>
         </div>
         <div class="mb-3">
+            <label for="overview" class="form-label">Overview</label>
+            <textarea class="form-control" id="overview" name="overview" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
         </div>
@@ -20,13 +24,26 @@
             <input type="url" class="form-control" id="video" name="video">
         </div>
         <div class="mb-3">
-            <label for="file" class="form-label">README File</label>
-            <input type="file" class="form-control" id="file" name="file" accept=".md">
+            <label for="file" class="form-label">Upload image</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".png, .jpg, .jpeg">
+        </div>
+        <div class="mb-3">
+            <label for="objectives" class="form-label">Objectives (new line for each)</label>
+            <textarea class="form-control" id="objectives" name="objectives" rows="5"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="key_learning" class="form-label">key learning (new line for each)</label>
+            <textarea class="form-control" id="key_learning" name="key_learning" rows="5"></textarea>
         </div>
         <div class="mb-3">
             <label for="tech" class="form-label">Technologies (comma-separated)</label>
             <input type="text" class="form-control" id="tech" name="tech">
         </div>
+        <label for="status" class="form-label">Status</label>
+        <select name="status" id="status" style="display: block;" class="mb-3"> 
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+        </select>
         <button type="submit" class="btn btn-primary">Add Project</button>
     </form>
 {% endblock %}

@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from .models import Project, User
+from .models import User, Project, Tech
 
 # Create your views here.
 
@@ -14,7 +14,44 @@ def index(request):
 
 
 def add(request):
-    return render(request, "projects/add.html")
+    if request.method == "POST":
+        # Get project data
+        title = request.POST["title"]
+        overview = request.POST["overview"]
+        description = request.POST["description"]
+        video_url = request.POST["video"]
+        image = request.FILES["file"]
+        objectives = request.POST["objectives"]
+        key_learning = request.POST["key_learning"]
+        status = request.POST["status"]
+
+        # Get tech data
+        tech = request.POST["tech"]
+
+        # Save project data
+        project = Project.objects.create(
+            owner=request.user,
+            title=title,
+            overview=overview,
+            description=description,
+            video_url=video_url,
+            image=image,
+            objectives=objectives,
+            key_learning=key_learning,
+            is_public=True if status == "public" else "False",
+        )
+
+        # save tech data
+        skills = tech.split(",")
+        for name in skills:
+            Tech.objects.create(project=project, name=name)
+
+        return HttpResponseRedirect(
+            reverse("projects:project_detail", args=[project.id])
+        )
+
+    else:
+        return render(request, "projects/add.html")
 
 
 def project_detail(request, id):
@@ -28,7 +65,19 @@ def project_detail(request, id):
             {"message": "Project doesn't exist"},
         )
 
-    return render(request, "projects/project_detail.html", {"project": project})
+    # Get tech by project
+    techs = Tech.objects.filter(project=project)
+
+    return render(
+        request,
+        "projects/project_detail.html",
+        {
+            "project": project,
+            "key_learning": project.key_learning.splitlines(),
+            "objectives": project.objectives.splitlines(),
+            "techs": techs
+        },
+    )
 
 
 def dashboard(request, username):

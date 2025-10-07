@@ -56,9 +56,13 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm gap-2">
-                                            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary">View</a>
-                                            <button class="btn btn-warning">Edit</button>
-                                            <button class="btn btn-danger">Delete</button>
+                                            {% if user == project.owner %}
+                                                <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary">View</a>
+                                                <button class="btn btn-warning">Edit</button>
+                                                <button class="btn btn-danger">Delete</button>
+                                            {% else %}
+                                                <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary">View</a>
+                                            {% endif %}
                                         </div>
                                     </td>
                                     <td>{{ project.timestamp }}</td>
