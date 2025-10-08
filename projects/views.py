@@ -1,4 +1,3 @@
-import json
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -58,7 +57,10 @@ def create(request):
     else:
         return render(request, "projects/create.html")
 
+
 # Update existing project
+@csrf_exempt
+@login_required
 def update(request, id):
     return render(request, "projects/update.html")
 
@@ -69,7 +71,7 @@ def update(request, id):
 def delete(request, id):
     if request.method == "DELETE":
         project = get_object_or_404(Project, id=id, owner=request.user)
-       
+
         # Delete related tech objects
         Tech.objects.filter(project=project).delete()
 
@@ -78,9 +80,7 @@ def delete(request, id):
 
         return HttpResponse(status=204)
     else:
-        return JsonResponse({
-            "error": "DELETE request required."
-        }, status=400)
+        return JsonResponse({"error": "DELETE request required."}, status=400)
 
 
 # Display project detail
@@ -106,9 +106,10 @@ def project_detail(request, id):
             "project": project,
             "key_learning": project.key_learning.splitlines(),
             "objectives": project.objectives.splitlines(),
-            "techs": techs
+            "techs": techs,
         },
     )
+
 
 @login_required
 def dashboard(request, username):
@@ -123,12 +124,44 @@ def dashboard(request, username):
     # Get user projects
     projects = Project.objects.filter(owner=user)
 
+    # Check if the user already follow or not
+    is_following = request.user in user.followers.all()
+
     # Render user dashboard
     return render(
         request,
         "projects/dashboard.html",
-        {"projects": projects, "profile": user.serializer()},
+        {
+            "projects": projects,
+            "profile": user.serializer(),
+            "is_following": is_following,
+        },
     )
+
+
+@csrf_exempt
+@login_required
+def follow(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Handle follow/unfollow action
+    user = User.objects.get(pk=user_id)
+    if request.user in user.followers.all():
+        user.followers.remove(request.user)
+        user.save()
+        return JsonResponse(
+            {"message": "Unfollowed", "followers": user.followers.count()}, status=200
+        )
+    else:
+        if user != request.user:
+            user.followers.add(request.user)
+            user.save()
+            return JsonResponse(
+                {"message": "Followed", "followers": user.followers.count()}, status=200
+            )
+        else:
+            return JsonResponse({"message": "Cannot follow yourself."}, status=400)
 
 
 def login_view(request):

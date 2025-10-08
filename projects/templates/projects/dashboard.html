@@ -12,16 +12,21 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h2 class="card-title">{{ profile.username }}</h2>
-                        <div class="d-flex justify-content-center mt-3">
+                        <div class="d-flex justify-content-center mt-3 mb-3">
                             <div class="px-3 border-end">
                                 <h5>Followers</h5>
-                                <span class="badge bg-primary">{{ profile.followers }}</span>
+                                <span class="badge bg-primary" id="followers-count">{{ profile.followers }}</span>
                             </div>
                             <div class="px-3">
                                 <h5>Following</h5>
                                 <span class="badge bg-primary">{{ profile.following }}</span>
                             </div>
                         </div>
+                        {% if profile.id != request.user.id %}
+                            <button class="btn btn-primary mt-2" id="toggle_follow" data-user="{{ profile.id }}">
+                                {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -85,6 +90,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             
             delete_project();
+            toggle_follow();
         });
 
         function delete_project() {
@@ -110,6 +116,33 @@
                         });
                     }
                 });
+            });
+        ;}
+
+        function toggle_follow() {
+            const btn = document.getElementById('toggle_follow');
+            if (!btn) return;
+            btn.addEventListener('click', function (event) {
+                event.preventDefault();
+                const userId = this.dataset.user;
+
+                fetch(`/follow/${userId}/`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(result => {
+                        const followersCountEl = document.getElementById('followers-count');
+                        if (result.message === 'Followed') {
+                            if (followersCountEl) followersCountEl.textContent = result.followers;
+                            btn.textContent = 'Unfollow';
+                        } else if (result.message === 'Unfollowed') {
+                            if (followersCountEl) followersCountEl.textContent = result.followers;
+                            btn.textContent = 'Follow';
+                        } else if (result.message) {
+                            alert(result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
             });
         }
     </script>
