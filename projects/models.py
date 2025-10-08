@@ -5,6 +5,7 @@ from django.db import models
 
 
 class User(AbstractUser):
+    photo = models.ImageField(blank=True, upload_to="media")
     followers = models.ManyToManyField(
         "self", symmetrical=False, related_name="following", blank=True
     )
@@ -13,6 +14,7 @@ class User(AbstractUser):
         return {
             "id": self.id,
             "username": self.username,
+            "photo": self.photo,
             "followers": self.followers.count(),
             "following": self.following.count(),
         }

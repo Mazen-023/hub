@@ -1,8 +1,11 @@
-from django.shortcuts import render
+import json
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Project, Tech
 
@@ -13,7 +16,9 @@ def index(request):
     return render(request, "projects/index.html")
 
 
-def add(request):
+# Create new project
+@login_required
+def create(request):
     if request.method == "POST":
         # Get project data
         title = request.POST["title"]
@@ -51,9 +56,35 @@ def add(request):
         )
 
     else:
-        return render(request, "projects/add.html")
+        return render(request, "projects/create.html")
+
+# Update existing project
+def update(request, id):
+    return render(request, "projects/update.html")
 
 
+# Delete existing project
+@csrf_exempt
+@login_required
+def delete(request, id):
+    if request.method == "DELETE":
+        project = get_object_or_404(Project, id=id, owner=request.user)
+       
+        # Delete related tech objects
+        Tech.objects.filter(project=project).delete()
+
+        # Delete the project
+        project.delete()
+
+        return HttpResponse(status=204)
+    else:
+        return JsonResponse({
+            "error": "DELETE request required."
+        }, status=400)
+
+
+# Display project detail
+@login_required
 def project_detail(request, id):
     # Get project
     try:
@@ -79,7 +110,7 @@ def project_detail(request, id):
         },
     )
 
-
+@login_required
 def dashboard(request, username):
     # Get user object
     try:
