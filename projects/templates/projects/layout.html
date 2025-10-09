@@ -23,6 +23,8 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand" style="color: #fd7e14;" href="{% url 'projects:index' %}">
@@ -84,6 +86,7 @@
         </div>
     </nav>
 
+    <!-- Messages -->
     {% if message %}
         <div class="container-fluid mt-3">
             <div class="alert alert-info alert-dismissible fade show" role="alert">
@@ -94,17 +97,18 @@
         </div>
     {% endif %}
 
+    <!-- Main Content -->
     <main class="flex-grow-1">
         {% block main %}{% endblock %}
     </main>
 
+    <!-- Footer -->
     <footer class="bg-white border-top mt-5 py-4">
         <div class="container text-center">
             <div class="row">
                 <div class="col-md-6">
                     <h6 class="text-muted mb-0">
-                        <i class="bi bi-code-square me-2"></i>
-                        Developer Hub
+                        <i class="bi bi-code-square me-2"></i>Developer Hub
                     </h6>
                     <small class="text-muted">Share and discover amazing projects</small>
                 </div>
@@ -119,9 +123,11 @@
         </div>
     </footer>
 
+    <!-- Bootstrap js library -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
+        
 </body>
 
 </html>

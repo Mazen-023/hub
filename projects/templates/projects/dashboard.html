@@ -7,6 +7,7 @@
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-xl-10">
+
             <!-- Profile Card -->
             <div class="row justify-content-center mb-4">
                 <div class="col-lg-4">
@@ -38,7 +39,7 @@
                                 </div>
                                 <div class="text-center">
                                     {% if profile.id != request.user.id %}
-                                        <button class="btn btn-primary" id="toggle_follow" data-user="{{ profile.id }}">
+                                        <button class="btn {% if is_following %}btn-outline-danger{% else %}btn-primary{% endif %}" id="toggle_follow" data-user="{{ profile.id }}">
                                             <i class="bi bi-{% if is_following %}person-dash{% else %}person-plus{% endif %} me-1"></i>
                                             {% if is_following %}Unfollow{% else %}Follow{% endif %}
                                         </button>
@@ -122,111 +123,8 @@
                     {% endif %}
                 </div>
             </div>
+            
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block script %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        delete_project();
-        toggle_follow();
-    });
-
-    function delete_project() {
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                const projectId = this.dataset.id;
-                const projectRow = this.closest('tr');
-                const projectTitle = projectRow.querySelector('.project-title').textContent;
-
-                if (confirm(`Are you sure you want to delete "${projectTitle}"? This action cannot be undone.`)) {
-                    // Add loading state
-                    this.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-                    this.disabled = true;
-
-                    fetch(`/delete/${projectId}/`, {
-                        method: 'DELETE'
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // Fade out and remove the row
-                            projectRow.style.transition = 'opacity 0.3s ease';
-                            projectRow.style.opacity = '0';
-                            setTimeout(() => {
-                                projectRow.remove();
-                                // Update project count
-                                const badge = document.querySelector('.card-header .badge');
-                                if (badge) {
-                                    const currentCount = parseInt(badge.textContent.split(' ')[0]);
-                                    badge.textContent = `${currentCount - 1} total`;
-                                }
-                            }, 300);
-                        } else {
-                            alert('Something went wrong. Please try again.');
-                            // Reset button
-                            this.innerHTML = '<i class="bi bi-trash"></i>';
-                            this.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please check the console.');
-                        // Reset button
-                        this.innerHTML = '<i class="bi bi-trash"></i>';
-                        this.disabled = false;
-                    });
-                }
-            });
-        });
-    }
-
-    function toggle_follow() {
-        const btn = document.getElementById('toggle_follow');
-        if (!btn) return;
-
-        btn.addEventListener('click', function (event) {
-            event.preventDefault();
-            const userId = this.dataset.user;
-            const originalText = this.innerHTML;
-
-            // Add loading state
-            this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
-            this.disabled = true;
-
-            fetch(`/follow/${userId}/`, { 
-                method: 'POST' 
-            })
-            .then(response => response.json())
-            .then(result => {
-                const followerCount = document.getElementById('followers-count');
-
-                if (result.message === 'Followed') {
-                    if (followerCount) followerCount.textContent = result.followers;
-                    this.innerHTML = '<i class="bi bi-person-dash me-2"></i>Unfollow';
-                    this.classList.remove('btn-primary');
-                    this.classList.add('btn-outline-danger');
-                } else if (result.message === 'Unfollowed') {
-                    if (followerCount) followerCount.textContent = result.followers;
-                    this.innerHTML = '<i class="bi bi-person-plus me-2"></i>Follow';
-                    this.classList.remove('btn-outline-danger');
-                    this.classList.add('btn-primary');
-                } else if (result.message) {
-                    alert(result.message);
-                    this.innerHTML = originalText;
-                }
-
-                this.disabled = false;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                this.innerHTML = originalText;
-                this.disabled = false;
-                alert('An error occurred. Please try again.');
-            });
-        });
-    }
-</script>
 {% endblock %}

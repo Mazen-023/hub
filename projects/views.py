@@ -11,8 +11,12 @@ from .models import User, Project, Tech
 
 # Create your views here.
 def index(request):
-    # Get all projects
-    projects = Project.objects.all().order_by("-timestamp")
+    # Get all public projects, excluding the current user's if authenticated
+    projects = Project.objects.filter(is_public=True)
+    if request.user.is_authenticated:
+        projects = projects.exclude(owner=request.user)
+    
+    projects = projects.order_by("-timestamp")
     return render(request, "projects/index.html", {"projects": projects})
 
 

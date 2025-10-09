@@ -126,3 +126,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Configuration for storing images
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR
+
+# URL for login page
+LOGIN_URL = "projects:login"
