@@ -2,55 +2,126 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-        <title>
-            {% block title %}Developer Hub{% endblock %}
-        </title>
-        {% block script %}
-        {% endblock %}
-    </head>
-    <body>
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'projects:index' %}">Hub</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                    {% if user.is_authenticated %}
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'projects:create' %}">Add project</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'projects:dashboard' user.username %}">Dashboard</a>
-                            </li>
-                        </ul>
-                    {% else %}
-                    {% endif %}
-                    <ul class="navbar-nav ms-auto">
-                        {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:logout' %}">Logout</a></li>
-                        {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:login' %}">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'projects:register' %}">Register</a></li>
-                        {% endif %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <title>
+        {% block title %}Developer Hub{% endblock %}
+    </title>
+    <!-- Custom css and script -->
+    {% block style %}
+        <link rel="stylesheet" href="{% static 'projects/style.css' %}">
+    {% endblock %}
+
+    {% block script %}
+        <script src="{% static 'projects/script.js' %}"></script>
+    {% endblock %}
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" style="color: #fd7e14;" href="{% url 'projects:index' %}">
+                <i class="bi bi-code-square me-2"></i>Developer Hub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                {% if user.is_authenticated %}
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="{% url 'projects:create' %}">Add Project</a>
+                        </li>
                     </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.photo %}
+                                    <img src="{{ user.photo.url }}" alt="Profile" class="rounded-circle me-2"
+                                        style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+                                {% endif %}
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'projects:dashboard' user.username %}">Dashboard</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'projects:logout' %}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                {% else %}
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="{% url 'projects:login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="{% url 'projects:register' %}">
+                                <i class="bi bi-person-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if message %}
+        <div class="container-fluid mt-3">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endif %}
+
+    <main class="flex-grow-1">
+        {% block main %}{% endblock %}
+    </main>
+
+    <footer class="bg-white border-top mt-5 py-4">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-0">
+                        <i class="bi bi-code-square me-2"></i>
+                        Developer Hub
+                    </h6>
+                    <small class="text-muted">Share and discover amazing projects</small>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-heart-fill text-danger me-1"></i>
+                        Made with love by <strong>Mazen Magdy</strong>
+                    </p>
+                    <small class="text-muted">&copy; 2025 All rights reserved</small>
                 </div>
             </div>
-        </nav>
-        {% if message %}
-            <div>{{ message }}</div>
-        {% endif %}
-        <main class="container-fluid mt-2">
-            {% block main %}{% endblock %}
-        </main>
-        <footer class="card text-center mt-5">
-            <h6 class="card-header">&copy; Mazen Magdy</h6>
-        </footer>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    </body>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>

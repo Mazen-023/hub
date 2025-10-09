@@ -22,9 +22,6 @@ class User(AbstractUser):
     def is_valid_follower(self):
         return not self.following.filter(pk=self.pk).exists()
 
-    def __str__(self):
-        return f"{self.username} have {self.followers.count()} Followers"
-
 
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
@@ -36,9 +33,12 @@ class Project(models.Model):
     objectives = models.TextField(blank=True)
     key_learning = models.TextField(blank=True)
     is_public = models.BooleanField(default=True)
-    # Track the users who see this project
     viewers = models.ManyToManyField(User, related_name="viewed_projects", blank=True, editable=False)
+    stars = models.ManyToManyField(User, related_name="starred_projects", blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"project: {self.title}, created by {self.owner.username}."

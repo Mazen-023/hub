@@ -10,9 +10,13 @@ from .models import User, Project, Tech
 
 # Create your views here.
 
-
+# Dynamic stream of content 'feed'
 def index(request):
-    return render(request, "projects/index.html")
+    # Get all projects
+    projects = Project.objects.all().order_by("-timestamp")
+    return render(request, "projects/index.html", {
+        "projects": projects
+    })
 
 
 # Create new project
@@ -24,7 +28,7 @@ def create(request):
         overview = request.POST["overview"]
         description = request.POST["description"]
         video_url = request.POST["video"]
-        image = request.FILES["file"]
+        image = request.FILES.get("file")
         objectives = request.POST["objectives"]
         key_learning = request.POST["key_learning"]
         status = request.POST["status"]
@@ -42,7 +46,7 @@ def create(request):
             image=image,
             objectives=objectives,
             key_learning=key_learning,
-            is_public=True if status == "public" else "False",
+            is_public=True if status == "public" else False,
         )
 
         # save tech data
@@ -166,6 +170,30 @@ def follow(request, user_id):
         else:
             return JsonResponse({"message": "Cannot follow yourself."}, status=400)
 
+@csrf_exempt
+@login_required
+def star(request, project_id):
+
+    # Toggle star via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    if request.user.is_authenticated:
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse({"error": "Project not found."}, status=404)
+
+        # Toggle like
+        if request.user in project.stars.all():
+            project.stars.remove(request.user)
+            return JsonResponse({"stars": project.stars.count()}, status=200)
+        else:
+            project.stars.add(request.user)
+            return JsonResponse({"stars": project.stars.count()}, status=200)
+    else:
+        return JsonResponse({"error": "User not authenticated."}, status=403)
+    
 
 def login_view(request):
     if request.method == "POST":
