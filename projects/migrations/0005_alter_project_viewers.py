@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0004_remove_project_views_project_viewers'),
+        ("projects", "0004_remove_project_views_project_viewers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='viewers',
-            field=models.ManyToManyField(blank=True, default=0, editable=False, related_name='viewed_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="viewers",
+            field=models.ManyToManyField(
+                blank=True,
+                default=0,
+                editable=False,
+                related_name="viewed_projects",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

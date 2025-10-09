@@ -1,9 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 # Create your models here.
-
-
 class User(AbstractUser):
     photo = models.ImageField(blank=True, upload_to="media")
     followers = models.ManyToManyField(
@@ -33,12 +32,14 @@ class Project(models.Model):
     objectives = models.TextField(blank=True)
     key_learning = models.TextField(blank=True)
     is_public = models.BooleanField(default=True)
-    viewers = models.ManyToManyField(User, related_name="viewed_projects", blank=True, editable=False)
+    viewers = models.ManyToManyField(
+        User, related_name="viewed_projects", blank=True, editable=False
+    )
     stars = models.ManyToManyField(User, related_name="starred_projects", blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ["-timestamp"]
 
     def __str__(self):
         return f"project: {self.title}, created by {self.owner.username}."

@@ -23,10 +23,17 @@ class ProjectTestCase(TestCase):
         Project.objects.create(
             owner=bar,
             title="test project 2",
-            views=50,
             description="project 2 description",
             overview="project 2 overview",
         )
+
+        # Set up viewers
+        project.viewers.add(baz)
+        project.viewers.add(bar)
+
+        # Set up stars
+        project.stars.add(baz)
+        project.stars.add(bar)
 
         # Create Tech
         Tech.objects.create(project=project, name="Django")
@@ -51,13 +58,26 @@ class ProjectTestCase(TestCase):
         self.assertFalse(user2 == project.owner)
 
     def test_project_detail(self):
+        """Check the project detail"""
         project = Project.objects.get(title="test project 2")
         self.assertTrue(project.title == "test project 2")
-        self.assertTrue(project.views == 50)
         self.assertTrue(project.overview == "project 2 overview")
         self.assertTrue(project.description == "project 2 description")
 
     def test_tech(self):
+        """Check technologies related to a project."""
         project = Project.objects.get(title="test project 2")
         techs = Tech.objects.filter(project=project)
         self.assertTrue(tech == ["Django", "React"] for tech in techs)
+
+    def test_star(self):
+        """Check if the project have stars"""
+        user = User.objects.get(username="foo")
+        project = Project.objects.get(owner=user)
+        self.assertTrue(project.stars.count() == 2)
+
+    def test_viewers(self):
+        """Check if the project have viewers"""
+        user = User.objects.get(username="foo")
+        project = Project.objects.get(owner=user)
+        self.assertTrue(project.viewers.count() == 2)

@@ -5,19 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0006_alter_project_viewers'),
+        ("projects", "0006_alter_project_viewers"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='project',
-            options={'ordering': ['-timestamp']},
+            name="project",
+            options={"ordering": ["-timestamp"]},
         ),
         migrations.AddField(
-            model_name='project',
-            name='stars',
-            field=models.ManyToManyField(blank=True, related_name='starred_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="stars",
+            field=models.ManyToManyField(
+                blank=True, related_name="starred_projects", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

@@ -5,15 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0005_alter_project_viewers'),
+        ("projects", "0005_alter_project_viewers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='viewers',
-            field=models.ManyToManyField(blank=True, editable=False, related_name='viewed_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="viewers",
+            field=models.ManyToManyField(
+                blank=True,
+                editable=False,
+                related_name="viewed_projects",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

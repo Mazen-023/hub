@@ -8,15 +8,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Project, Tech
 
-# Create your views here.
 
-# Dynamic stream of content 'feed'
+# Create your views here.
 def index(request):
     # Get all projects
     projects = Project.objects.all().order_by("-timestamp")
-    return render(request, "projects/index.html", {
-        "projects": projects
-    })
+    return render(request, "projects/index.html", {"projects": projects})
 
 
 # Create new project
@@ -104,7 +101,11 @@ def project_detail(request, id):
     techs = Tech.objects.filter(project=project)
 
     # Add unique authenticated viewer if they are not the owner
-    if request.user.is_authenticated and request.user != project.owner and project.is_public:
+    if (
+        request.user.is_authenticated
+        and request.user != project.owner
+        and project.is_public
+    ):
         project.viewers.add(request.user)
 
     return render(
@@ -146,6 +147,7 @@ def dashboard(request, username):
         },
     )
 
+
 @csrf_exempt
 @login_required
 def follow(request, user_id):
@@ -170,10 +172,10 @@ def follow(request, user_id):
         else:
             return JsonResponse({"message": "Cannot follow yourself."}, status=400)
 
+
 @csrf_exempt
 @login_required
 def star(request, project_id):
-
     # Toggle star via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -193,7 +195,7 @@ def star(request, project_id):
             return JsonResponse({"stars": project.stars.count()}, status=200)
     else:
         return JsonResponse({"error": "User not authenticated."}, status=403)
-    
+
 
 def login_view(request):
     if request.method == "POST":

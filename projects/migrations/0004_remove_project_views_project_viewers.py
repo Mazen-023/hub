@@ -5,19 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0003_user_photo'),
+        ("projects", "0003_user_photo"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='project',
-            name='views',
+            model_name="project",
+            name="views",
         ),
         migrations.AddField(
-            model_name='project',
-            name='viewers',
-            field=models.ManyToManyField(blank=True, editable=False, related_name='viewed_projects', to=settings.AUTH_USER_MODEL),
+            model_name="project",
+            name="viewers",
+            field=models.ManyToManyField(
+                blank=True,
+                editable=False,
+                related_name="viewed_projects",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
