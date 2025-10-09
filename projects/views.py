@@ -100,7 +100,7 @@ def project_detail(request, id):
     techs = Tech.objects.filter(project=project)
 
     # Add unique authenticated viewer if they are not the owner
-    if request.user.is_authenticated and request.user != project.owner:
+    if request.user.is_authenticated and request.user != project.owner and project.is_public:
         project.viewers.add(request.user)
 
     return render(
