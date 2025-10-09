@@ -36,7 +36,8 @@ class Project(models.Model):
     objectives = models.TextField(blank=True)
     key_learning = models.TextField(blank=True)
     is_public = models.BooleanField(default=True)
-    views = models.IntegerField(default=0)
+    # Track the users who see this project
+    viewers = models.ManyToManyField(User, related_name="viewed_projects", blank=True, editable=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

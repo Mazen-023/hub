@@ -51,7 +51,7 @@
                                 <tr>
                                     <td>{{ project.id }}</td>
                                     <td>{{ project.title }}</td>
-                                    <td>{{ project.views }}</td>
+                                    <td>{{ project.viewers.count }}</td>
                                     <td>
                                         {% if project.is_public %}
                                             <span class="badge bg-success">Public</span>

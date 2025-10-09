@@ -99,6 +99,10 @@ def project_detail(request, id):
     # Get tech by project
     techs = Tech.objects.filter(project=project)
 
+    # Add unique authenticated viewer if they are not the owner
+    if request.user.is_authenticated and request.user != project.owner:
+        project.viewers.add(request.user)
+
     return render(
         request,
         "projects/project_detail.html",
@@ -137,7 +141,6 @@ def dashboard(request, username):
             "is_following": is_following,
         },
     )
-
 
 @csrf_exempt
 @login_required
