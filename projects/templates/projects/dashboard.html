@@ -97,13 +97,23 @@
                                             <td class="align-middle">
                                                 <span class="badge bg-warning">{{ project.stars.count }}</span>
                                             </td>
+
+                                            <!-- visibility display and aciton -->
                                             <td class="align-middle">
-                                                {% if project.is_public %}
-                                                    <span class="badge bg-success">Public</span>
+                                                {% if project.owner == user %}
+                                                    <select name="visibility" data-id="{{ project.id }}" class="visibility-select badge bg-light text-black">
+                                                        <option value="public" {% if project.is_public %}selected disabled{% endif %}>Public</option>
+                                                        <option value="private" {% if not project.is_public %}selected disabled{% endif %}>Private</option>
+                                                    </select>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">Private</span>
+                                                    {% if project.is_public %}
+                                                        <span class="badge bg-success">Public</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Private</span>
+                                                    {% endif %}
                                                 {% endif %}
                                             </td>
+                                            
                                             <td class="align-middle">
                                                 <small class="text-muted">{{ project.timestamp|date:"M d, Y" }}</small>
                                             </td>

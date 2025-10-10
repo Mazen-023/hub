@@ -251,6 +251,31 @@ def star(request, project_id):
         return JsonResponse({"error": "User not authenticated."}, status=403)
 
 
+@csrf_exempt
+@login_required
+def visibility(request, project_id):
+    # Allow only PUT request
+    if request.method != "PUT":
+        return JsonResponse({"error": "PUT request required."})
+
+    # Get the current project
+    project = Project.objects.get(pk=project_id)
+
+    # access request body
+    data = json.loads(request.body)
+
+    # Change visibility
+    project.is_public = (data.get("visibility") == "public")
+
+    # Save changes
+    project.save()
+
+    return JsonResponse({
+        "message": "visibility changes successfully.",
+        "is_public": project.is_public
+        }, status=200)
+
+
 def login_view(request):
     if request.method == "POST":
         # Sign user in

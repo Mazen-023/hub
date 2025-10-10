@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
         photoForm.addEventListener('change', upload_photo);
     }
     
+    // Project visibility
+    document.querySelectorAll('.visibility-select').forEach(select => {change_visibility(select)});
+
 });
 
 function delete_project(btn) {
@@ -169,5 +172,41 @@ function upload_photo() {
     })
     .catch(error => {
         console.log('Error', error);
+    });
+};
+
+function change_visibility(select) {
+    select.addEventListener('change', function() {
+        if(confirm('Confirm your request for project visibility')) {
+            
+            const projectId = this.dataset.id;
+            fetch(`/project/visibility/${projectId}/`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    visibility: this.value
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                
+                const publicOption = this.querySelector('option[value="public"]');
+                const privateOption = this.querySelector('option[value="private"]');
+                if (result['is_public']) {
+                    publicOption.selected = true;
+                    publicOption.disabled = true;
+                    privateOption.disabled = false;
+                } else {
+                    privateOption.selected = true;
+                    privateOption.disabled = true;
+                    publicOption.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.log('Error:', error);
+            })
+        } else {
+            window.location.reload();
+        }
     });
 };
