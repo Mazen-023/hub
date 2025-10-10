@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    
     // Delete specific project
     document.querySelectorAll('.delete-btn').forEach(button => { delete_project(button) });
 
@@ -12,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Star Feature
-    document.querySelectorAll('.star').forEach(button => { star(button) });
+    document.querySelectorAll('.star-btn').forEach(button => { star(button) });
 
     // Review Feature
     const reviewBtn = document.querySelector('#review-btn');
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (photoForm) {
         photoForm.addEventListener('change', upload_photo);
     }
+    
 });
 
 function delete_project(btn) {
@@ -103,36 +105,25 @@ function star(btn) {
         })
         .then(response => response.json())
         .then(result => {
-            // Update the star count
-            const star_count = document.querySelector(`.star-count[data-id="${projectId}"]`);
-            if (star_count) {
-                star_count.innerHTML = result["stars"];
-            }
+            console.log(result);
 
-            // Toggle the star icon(s) - check each one separately
-            const star_icon1 = document.querySelector(`.star_icon1[data-id="${projectId}"]`);
-            if (star_icon1) {
-                star_icon1.innerHTML = star_icon1.innerHTML === '⭐' ? '☆' : '⭐';
-            }
-
-            const star_icon2 = document.querySelector(`.star_icon2[data-id="${projectId}"]`);
-            if (star_icon2) {
-                star_icon2.innerHTML = star_icon2.innerHTML === '★' ? '☆' : '★';
-            }
-
-            // Toggle button text and style
-            if (this.textContent.includes('Star') && !this.textContent.includes('Starred')) {
-                this.innerHTML = '<i class="star_icon1" data-id="' + projectId + '">⭐</i> Starred';
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('btn-outline-warning');
+            // Update button appearance based on the new star status
+            if (result.starred) {
+                this.classList.replace('btn-outline-secondary', 'btn-warning');
+                this.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
             } else {
-                this.innerHTML = '<i class="star_icon1" data-id="' + projectId + '">☆</i> Star';
-                this.classList.remove('btn-outline-warning');
-                this.classList.add('btn-outline-secondary');
+                this.classList.replace('btn-warning', 'btn-outline-secondary');
+                this.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
+            }
+            
+            // Update only the star count on this specific button
+            const countElement = document.querySelector('#star-count');
+            if (countElement) {
+                countElement.textContent = result.count;
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.log('Error:', error);
         });
     });
 };

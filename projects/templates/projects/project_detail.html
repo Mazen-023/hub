@@ -25,33 +25,28 @@
                                 {% if project.is_public %}Public{% else %}Private{% endif %}
                             </span>
                         </div>
-
+                        
+                        <!-- Viewer and star Feature -->
                         <div class="d-flex align-items-center gap-2">
-                            <div class="d-flex align-items-center text-muted me-3">
+
+                            <!-- Viewer count display -->
+                            <button class="btn btn-sm btn-outline-secondary disabled">
                                 <i class="bi bi-eye me-1"></i>
                                 <span class="me-1">Watch</span>
                                 <span>{{ project.viewers.count }}</span>
-                            </div>
+                            </button>
 
+                            <!-- Star display with Action -->
                             {% if project.owner != user %}
-                                {% if user in project.stars.all %}
-                                    <button class="btn btn-sm btn-warning star" data-id="{{ project.id }}">
-                                        <i class="star_icon1" data-id="{{ project.id }}">⭐</i>
-                                        <span class="me-1">Starred</span>
-                                        <span class="star-count" data-id="{{ project.id }}">{{ project.stars.count }}</span>
-                                    </button>
-                                {% else %}
-                                    <button class="btn btn-sm btn-outline-secondary star" data-id="{{ project.id }}">
-                                        <i class="star_icon1" data-id="{{ project.id }}">☆</i>
-                                        <span class="me-1">Star</span>
-                                        <span class="star-count" data-id="{{ project.id }}">{{ project.stars.count }}</span>
-                                    </button>
-                                {% endif %}
+                                <button class="btn btn-sm {% if user in project.stars.all %}btn-warning{% else %}btn-outline-secondary{% endif %} star-btn" data-id="{{ project.id }}">
+                                    <i class="bi {% if user in project.stars.all %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                    <span>Star</span>
+                                    <span id="star-count">{{ project.stars.count }}</span>
+                                </button>
                             {% else %}
-                                <div class="d-flex align-items-center text-muted">
-                                    <i class="bi bi-star-fill text-warning me-1"></i>
-                                    <span class="me-1">Star</span>
-                                    <span class="star-count" data-id="{{ project.id }}">{{ project.stars.count }}</span>
+                                <div class="btn btn-sm btn-outline-secondary disabled">
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    <span id="star-count">{{ project.stars.count }}</span>
                                 </div>
                             {% endif %}
 
@@ -165,7 +160,7 @@
                     <div class="col-lg-4">
 
                         <!-- Technologies -->
-                        <div class="card border-0 shadow-sm mb-3">
+                        <div class="card border-0 shadow-sm mb-3 mt-3">
                             <div class="card-header bg-light">
                                 <h6 class="mb-0">
                                     <i class="bi bi-code-slash me-2"></i>Technologies

@@ -11,6 +11,8 @@ from .models import Review, User, Project, Tech
 
 
 # Create your views here.
+
+# Feed Page
 def index(request):
     # Get all public projects, excluding the current user's if authenticated
     projects = Project.objects.filter(is_public=True)
@@ -239,13 +241,12 @@ def star(request, project_id):
         except Project.DoesNotExist:
             return JsonResponse({"error": "Project not found."}, status=404)
 
-        # Toggle like
         if request.user in project.stars.all():
             project.stars.remove(request.user)
-            return JsonResponse({"stars": project.stars.count()}, status=200)
+            return JsonResponse({"starred": False, "count": project.stars.count()}, status=200)
         else:
             project.stars.add(request.user)
-            return JsonResponse({"stars": project.stars.count()}, status=200)
+            return JsonResponse({"starred": True, "count": project.stars.count()}, status=200)
     else:
         return JsonResponse({"error": "User not authenticated."}, status=403)
 
