@@ -15,8 +15,16 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.star').forEach(button => { star(button) });
 
     // Review Feature
-    document.querySelector('#review-btn').addEventListener('click', review)
+    const reviewBtn = document.querySelector('#review-btn');
+    if (reviewBtn) {
+        reviewBtn.addEventListener('click', review);
+    }
 
+    // Image Upload
+    const photoForm = document.querySelector('#photo-form');
+    if (photoForm) {
+        photoForm.addEventListener('change', upload_photo);
+    }
 });
 
 function delete_project(btn) {
@@ -51,7 +59,7 @@ function delete_project(btn) {
             });
         }
     });
-}
+};
 
 function toggle_follow(userId) {
     const btn = document.querySelector('#toggle_follow')
@@ -83,7 +91,7 @@ function toggle_follow(userId) {
     .catch(error => {
         console.error('Error:', error);
     });
-}
+};
 
 function star(btn) {
     btn.addEventListener('click', function (event) {
@@ -127,7 +135,7 @@ function star(btn) {
             console.error('Error:', error);
         });
     });
-}
+};
 
 function review() {
     project_id = document.getElementById('review-btn').dataset.id;
@@ -148,4 +156,27 @@ function review() {
     .catch(error => {
         console.log(error);
     });
-}
+};
+
+function upload_photo() {
+    const image = document.querySelector('#photo-upload')
+
+    // Create FormData object to properly send the image file
+    const formData = new FormData();
+    formData.append('photo', image.files[0]);
+
+    fetch('/update_photo/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        console.log(result);
+
+        // Refresh the image to show the new upload
+        document.getElementById('profile-image').src = URL.createObjectURL(image.files[0]);
+    })
+    .catch(error => {
+        console.log('Error', error);
+    });
+};

@@ -4,6 +4,7 @@ from django.db import models
 
 # Create your models here.
 
+
 # User entity
 class User(AbstractUser):
     photo = models.ImageField(blank=True, upload_to="media")
@@ -60,7 +61,9 @@ class Tech(models.Model):
 # User adds a review on a project
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_reviews")
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="project_reviews"
+    )
     content = models.TextField(blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

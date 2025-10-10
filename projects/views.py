@@ -16,7 +16,7 @@ def index(request):
     projects = Project.objects.filter(is_public=True)
     if request.user.is_authenticated:
         projects = projects.exclude(owner=request.user)
-    
+
     projects = projects.order_by("-timestamp")
     return render(request, "projects/index.html", {"projects": projects})
 
@@ -67,8 +67,7 @@ def create(request):
 # Update existing project
 @csrf_exempt
 @login_required
-def update(request, id):
-    return render(request, "projects/update.html")
+def update(request): ...
 
 
 # Delete existing project
@@ -124,9 +123,10 @@ def project_detail(request, id):
             "key_learning": project.key_learning.splitlines(),
             "objectives": project.objectives.splitlines(),
             "techs": techs,
-            "reviews": reviews
+            "reviews": reviews,
         },
     )
+
 
 @csrf_exempt
 @login_required
@@ -145,14 +145,16 @@ def review(request, project_id):
         return JsonResponse({"message": "Empty review not allowed"})
 
     # Create new review
-    review = Review.objects.create(user=request.user, project=project, content=data.get("content"))
+    review = Review.objects.create(
+        user=request.user, project=project, content=data.get("content")
+    )
     review.save()
 
     # Return new content
-    return JsonResponse({
-        "message": "Comment added successfully.",
-        "content": review.content
-    }, status=201)
+    return JsonResponse(
+        {"message": "Comment added successfully.", "content": review.content},
+        status=201,
+    )
 
 
 @login_required
@@ -181,6 +183,22 @@ def dashboard(request, username):
             "is_following": is_following,
         },
     )
+
+
+@csrf_exempt
+@login_required
+def update_photo(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request is required."})
+
+    # Get the image file from the client-side
+    image = request.FILES["photo"]
+
+    # Save the user image
+    request.user.photo = image
+    request.user.save()
+
+    return JsonResponse({"message": "Image uploaded sucessfully."}, status=200)
 
 
 @csrf_exempt
