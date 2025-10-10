@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import User, Project, Tech
+from .models import Review, User, Project, Tech
 
 
 # Create your views here.
@@ -112,6 +113,9 @@ def project_detail(request, id):
     ):
         project.viewers.add(request.user)
 
+    # Get project reviews
+    reviews = Review.objects.filter(project=id)
+
     return render(
         request,
         "projects/project_detail.html",
@@ -120,8 +124,35 @@ def project_detail(request, id):
             "key_learning": project.key_learning.splitlines(),
             "objectives": project.objectives.splitlines(),
             "techs": techs,
+            "reviews": reviews
         },
     )
+
+@csrf_exempt
+@login_required
+def review(request, project_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request is required."})
+
+    # Current project
+    project = Project.objects.get(pk=project_id)
+    if not project:
+        return JsonResponse({"error": "Project Not Found."})
+
+    # Load request content
+    data = json.loads(request.body)
+    if not data.get("content"):
+        return JsonResponse({"message": "Empty review not allowed"})
+
+    # Create new review
+    review = Review.objects.create(user=request.user, project=project, content=data.get("content"))
+    review.save()
+
+    # Return new content
+    return JsonResponse({
+        "message": "Comment added successfully.",
+        "content": review.content
+    }, status=201)
 
 
 @login_required

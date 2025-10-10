@@ -11,8 +11,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Add star to a project
+    // Star Feature
     document.querySelectorAll('.star').forEach(button => { star(button) });
+
+    // Review Feature
+    document.querySelector('#review-btn').addEventListener('click', review)
 
 });
 
@@ -24,7 +27,6 @@ function delete_project(btn) {
         const projectTitle = projectRow.querySelector('.project-title').textContent;
 
         if (confirm(`Are you sure you want to delete "${projectTitle}"? This action cannot be undone.`)) {
-            // Add loading state
             this.innerHTML = '<i class="bi bi-hourglass-split"></i>';
             this.disabled = true;
 
@@ -33,31 +35,19 @@ function delete_project(btn) {
             })
             .then(response => {
                 if (response.ok) {
-                    // Fade out and remove the row
                     projectRow.style.transition = 'opacity 0.3s ease';
                     projectRow.style.opacity = '0';
                     setTimeout(() => {
                         projectRow.remove();
-                        // Update project count
-                        const badge = document.querySelector('.card-header .badge');
-                        if (badge) {
-                            const currentCount = parseInt(badge.textContent.split(' ')[0]);
-                            badge.textContent = `${currentCount - 1} total`;
-                        }
                     }, 300);
                 } else {
                     alert('Something went wrong. Please try again.');
-                    // Reset button
                     this.innerHTML = '<i class="bi bi-trash"></i>';
                     this.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred. Please check the console.');
-                // Reset button
-                this.innerHTML = '<i class="bi bi-trash"></i>';
-                this.disabled = false;
             });
         }
     });
@@ -66,7 +56,6 @@ function delete_project(btn) {
 function toggle_follow(userId) {
     const btn = document.querySelector('#toggle_follow')
 
-    // Add loading state
     btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
     btn.disabled = true;
 
@@ -88,6 +77,7 @@ function toggle_follow(userId) {
             btn.classList.remove('btn-outline-danger');
             btn.classList.add('btn-primary');
         }
+        
         btn.disabled = false;
     })
     .catch(error => {
@@ -136,5 +126,26 @@ function star(btn) {
         .catch(error => {
             console.error('Error:', error);
         });
+    });
+}
+
+function review() {
+    project_id = document.getElementById('review-btn').dataset.id;
+    content = document.getElementById('review').value;
+
+    fetch(`/reviews/${project_id}/`, {
+        method: 'POST',
+        body: JSON.stringify({
+            content: content,
+        })
+    })
+    .then(resposne => resposne.json())
+    .then(result => {
+        console.log(result);
+        document.getElementById('review').value = '';
+        window.location.reload();
+    })
+    .catch(error => {
+        console.log(error);
     });
 }

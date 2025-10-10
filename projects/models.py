@@ -3,6 +3,8 @@ from django.db import models
 
 
 # Create your models here.
+
+# User entity
 class User(AbstractUser):
     photo = models.ImageField(blank=True, upload_to="media")
     followers = models.ManyToManyField(
@@ -22,6 +24,7 @@ class User(AbstractUser):
         return not self.following.filter(pk=self.pk).exists()
 
 
+# Project created by a user
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField(max_length=255)
@@ -45,9 +48,24 @@ class Project(models.Model):
         return f"project: {self.title}, created by {self.owner.username}."
 
 
+# Technolgoies related to a project
 class Tech(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tech")
     name = models.CharField(max_length=200)
 
     def __str__(self):
         return f"{self.project.owner.username} have {self.name} skill."
+
+
+# User adds a review on a project
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_reviews")
+    content = models.TextField(blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Review by {self.user.username} on {self.project.title}"
