@@ -12,6 +12,7 @@ from .models import Review, User, Project, Tech
 
 # Create your views here.
 
+
 # Feed Page
 def index(request):
     # Get all public projects, excluding the current user's if authenticated
@@ -19,7 +20,6 @@ def index(request):
     if request.user.is_authenticated:
         projects = projects.exclude(owner=request.user)
 
-    projects = projects.order_by("-timestamp")
     return render(request, "projects/index.html", {"projects": projects})
 
 
@@ -60,7 +60,7 @@ def create(request):
         for name in skills:
             if name.strip():
                 Tech.objects.create(project=project, name=name.strip())
-        
+
         return HttpResponseRedirect(
             reverse("projects:project_detail", args=[project.id])
         )
@@ -74,11 +74,11 @@ def create(request):
 def update(request, id):
     # Get the project and verify ownership
     project = get_object_or_404(Project, id=id, owner=request.user)
-    
+
     # Get associated techs
     techs = Tech.objects.filter(project=project)
     tech_string = ", ".join([tech.name for tech in techs])
-    
+
     if request.method == "POST":
         # Get updated project data
         title = request.POST["title"]
@@ -89,11 +89,11 @@ def update(request, id):
         objectives = request.POST["objectives"]
         key_learning = request.POST["key_learning"]
         status = request.POST["status"]
-        
+
         # Update image only if a new one is provided
-        if 'file' in request.FILES:
+        if "file" in request.FILES:
             project.image = request.FILES["file"]
-        
+
         # Update project fields
         project.title = title
         project.overview = overview
@@ -104,21 +104,25 @@ def update(request, id):
         project.key_learning = key_learning
         project.is_public = True if status == "public" else False
         project.save()
-        
+
         # Update tech data - delete existing and create new
         Tech.objects.filter(project=project).delete()
         skills = request.POST["tech"].split(",")
         for name in skills:
             if name.strip():
                 Tech.objects.create(project=project, name=name.strip())
-        
-        return HttpResponseRedirect(reverse("projects:project_detail", args=[project.id]))
+
+        return HttpResponseRedirect(
+            reverse("projects:project_detail", args=[project.id])
+        )
     else:
         # For GET request, show form with existing data
-        return render(request, "projects/update.html", {
-            "project": project,
-            "tech_string": tech_string
-        })
+        return render(
+            request,
+            "projects/update.html",
+            {"project": project, "tech_string": tech_string},
+        )
+
 
 # Delete existing project
 @csrf_exempt
@@ -291,10 +295,14 @@ def star(request, project_id):
 
         if request.user in project.stars.all():
             project.stars.remove(request.user)
-            return JsonResponse({"starred": False, "count": project.stars.count()}, status=200)
+            return JsonResponse(
+                {"starred": False, "count": project.stars.count()}, status=200
+            )
         else:
             project.stars.add(request.user)
-            return JsonResponse({"starred": True, "count": project.stars.count()}, status=200)
+            return JsonResponse(
+                {"starred": True, "count": project.stars.count()}, status=200
+            )
     else:
         return JsonResponse({"error": "User not authenticated."}, status=403)
 
@@ -313,15 +321,15 @@ def visibility(request, project_id):
     data = json.loads(request.body)
 
     # Change visibility
-    project.is_public = (data.get("visibility") == "public")
+    project.is_public = data.get("visibility") == "public"
 
     # Save changes
     project.save()
 
-    return JsonResponse({
-        "message": "visibility changes successfully.",
-        "is_public": project.is_public
-        }, status=200)
+    return JsonResponse(
+        {"message": "visibility changes successfully.", "is_public": project.is_public},
+        status=200,
+    )
 
 
 def login_view(request):
