@@ -56,8 +56,9 @@ def create(request):
         # save tech data
         skills = tech.split(",")
         for name in skills:
-            Tech.objects.create(project=project, name=name)
-
+            if name.strip():
+                Tech.objects.create(project=project, name=name.strip())
+        
         return HttpResponseRedirect(
             reverse("projects:project_detail", args=[project.id])
         )
@@ -67,10 +68,53 @@ def create(request):
 
 
 # Update existing project
-@csrf_exempt
 @login_required
-def update(request): ...
-
+def update(request, id):
+    # Get the project and verify ownership
+    project = get_object_or_404(Project, id=id, owner=request.user)
+    
+    # Get associated techs
+    techs = Tech.objects.filter(project=project)
+    tech_string = ", ".join([tech.name for tech in techs])
+    
+    if request.method == "POST":
+        # Get updated project data
+        title = request.POST["title"]
+        overview = request.POST["overview"]
+        description = request.POST["description"]
+        video_url = request.POST["video"]
+        objectives = request.POST["objectives"]
+        key_learning = request.POST["key_learning"]
+        status = request.POST["status"]
+        
+        # Update image only if a new one is provided
+        if 'file' in request.FILES:
+            project.image = request.FILES["file"]
+        
+        # Update project fields
+        project.title = title
+        project.overview = overview
+        project.description = description
+        project.video_url = video_url
+        project.objectives = objectives
+        project.key_learning = key_learning
+        project.is_public = True if status == "public" else False
+        project.save()
+        
+        # Update tech data - delete existing and create new
+        Tech.objects.filter(project=project).delete()
+        skills = request.POST["tech"].split(",")
+        for name in skills:
+            if name.strip():
+                Tech.objects.create(project=project, name=name.strip())
+        
+        return HttpResponseRedirect(reverse("projects:project_detail", args=[project.id]))
+    else:
+        # For GET request, show form with existing data
+        return render(request, "projects/update.html", {
+            "project": project,
+            "tech_string": tech_string
+        })
 
 # Delete existing project
 @csrf_exempt

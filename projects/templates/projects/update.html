@@ -2,5 +2,69 @@
 {% load static %}
 
 {% block main %}
-    <h1>Update your project here.</h1>
+    <div class="container mt-3">        
+        <form action="{% url 'projects:update' project.id %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">Project Title</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ project.title }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="overview" class="form-label">Overview</label>
+                <textarea class="form-control" id="overview" name="overview" rows="2">{{ project.overview }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="5">{{ project.description }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="objectives" class="form-label">Objectives (One per line)</label>
+                <textarea class="form-control" id="objectives" name="objectives" rows="3">{{ project.objectives }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="key_learning" class="form-label">Key Learnings (One per line)</label>
+                <textarea class="form-control" id="key_learning" name="key_learning" rows="3">{{ project.key_learning }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tech" class="form-label">Technologies (Comma separated)</label>
+                <input type="text" class="form-control" id="tech" name="tech" value="{{ tech_string }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="video" class="form-label">Video URL (Optional)</label>
+                <input type="url" class="form-control" id="video" name="video" value="{{ project.video_url }}">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Current Image</label>
+                {% if project.image %}
+                    <div class="mb-2">
+                        <img src="{{ project.image.url }}" alt="Current project image" style="max-height: 200px;" class="img-thumbnail">
+                    </div>
+                {% else %}
+                    <p>No image currently uploaded</p>
+                {% endif %}
+                <label for="file" class="form-label">Upload New Image (Optional)</label>
+                <input type="file" class="form-control" id="file" name="file" accept="image/*">
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Project Visibility</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="public" {% if project.is_public %}selected{% endif %}>Public</option>
+                    <option value="private" {% if not project.is_public %}selected{% endif %}>Private</option>
+                </select>
+            </div>
+            
+            <div class="d-grid gap-2 col-6 mx-auto mb-3">
+                <button type="submit" class="btn btn-primary">Update Project</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}
