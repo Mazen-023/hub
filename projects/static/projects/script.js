@@ -180,7 +180,7 @@ function change_visibility(select) {
         if(confirm('Confirm your request for project visibility')) {
             
             const projectId = this.dataset.id;
-            fetch(`/project/visibility/${projectId}/`, {
+            fetch(`/visibility/${projectId}/`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     visibility: this.value

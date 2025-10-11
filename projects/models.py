@@ -32,6 +32,7 @@ class Project(models.Model):
     overview = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     video_url = models.URLField(blank=True)
+    github_url = models.URLField(blank=True)
     image = models.ImageField(blank=True, upload_to="media")
     objectives = models.TextField(blank=True)
     key_learning = models.TextField(blank=True)

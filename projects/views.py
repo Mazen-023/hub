@@ -32,6 +32,7 @@ def create(request):
         overview = request.POST["overview"]
         description = request.POST["description"]
         video_url = request.POST["video"]
+        github_url = request.POST["github"]
         image = request.FILES.get("file")
         objectives = request.POST["objectives"]
         key_learning = request.POST["key_learning"]
@@ -47,6 +48,7 @@ def create(request):
             overview=overview,
             description=description,
             video_url=video_url,
+            github_url=github_url,
             image=image,
             objectives=objectives,
             key_learning=key_learning,
@@ -83,6 +85,7 @@ def update(request, id):
         overview = request.POST["overview"]
         description = request.POST["description"]
         video_url = request.POST["video"]
+        github_url = request.POST["github"]
         objectives = request.POST["objectives"]
         key_learning = request.POST["key_learning"]
         status = request.POST["status"]
@@ -96,6 +99,7 @@ def update(request, id):
         project.overview = overview
         project.description = description
         project.video_url = video_url
+        project.github_url = github_url
         project.objectives = objectives
         project.key_learning = key_learning
         project.is_public = True if status == "public" else False
