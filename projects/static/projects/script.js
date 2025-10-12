@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Star Feature
-    document.querySelectorAll('.star-btn').forEach(button => { star(button) });
+    document.querySelectorAll('.star-btn').forEach(button => { stars(button) });
 
     // Review Feature
     const reviewBtn = document.querySelector('#review-btn');
@@ -59,6 +59,9 @@ function delete_project(btn) {
                     this.disabled = false;
                 }
             })
+            .then(result => {
+                console.log(result)
+            })
             .catch(error => {
                 console.error('Error:', error);
             });
@@ -72,13 +75,14 @@ function toggle_follow(userId) {
     btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
     btn.disabled = true;
 
-    fetch(`user/${userId}/follow/`, {
+    fetch(`/user/${userId}/follow/`, {
         method: 'POST'
     })
     .then(response => response.json())
     .then(result => {
+        console.log(result)
+        
         const followerCount = document.getElementById('followers-count');
-
         if (result.message === 'Followed') {
             followerCount.textContent = result.followers;
             btn.innerHTML = '<i class="bi bi-person-dash me-2"></i>Unfollow';
@@ -98,12 +102,12 @@ function toggle_follow(userId) {
     });
 };
 
-function star(btn) {
+function stars(btn) {
     btn.addEventListener('click', function (event) {
         event.preventDefault();
         const projectId = this.dataset.id;
 
-        fetch(`/project/${projectId}/star/`, {
+        fetch(`/project/${projectId}/stars/`, {
             method: 'POST'
         })
         .then(response => response.json())
@@ -159,7 +163,7 @@ function upload_photo() {
     const formData = new FormData();
     formData.append('photo', image.files[0]);
 
-    fetch('user/update_photo/', {
+    fetch('/user/update_photo/', {
         method: 'POST',
         body: formData
     })

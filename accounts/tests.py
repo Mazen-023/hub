@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from .models import User
 
+
 class UserTestCase(TestCase):
     def setUp(self):
         # Create user
@@ -14,7 +15,6 @@ class UserTestCase(TestCase):
         bar.following.add(baz)
         baz.following.add(bar)
 
-        
     def test_valid_follower(self):
         """User is NOT following themselves, should be valid."""
         user = User.objects.get(username="baz")

@@ -4,6 +4,7 @@ from .models import Project, Technology, Review
 
 from accounts.models import User
 
+
 class ProjectTestCase(TestCase):
     def setUp(self):
         # Create user
@@ -40,7 +41,6 @@ class ProjectTestCase(TestCase):
         # Set up stars
         project.stars.add(baz)
         project.stars.add(bar)
-
 
     def test_ownership(self):
         """User own a project"""

@@ -25,7 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("projects.urls")),
     path("", include("accounts.urls")),
-]   
+]
 
 
 # store images root

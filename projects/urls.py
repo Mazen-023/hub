@@ -6,7 +6,6 @@ app_name = "projects"
 
 urlpatterns = [
     path("", views.index, name="index"),
-
     # API Routes
     path("project/create/", views.create, name="create"),
     path("project/<int:pk>/update/", views.update, name="update"),

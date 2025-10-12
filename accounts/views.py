@@ -5,11 +5,13 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from projects.models import Project
 
 
 from .models import User
+
 
 # Login existing user
 def login_view(request):
@@ -22,20 +24,19 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            messages.success(request, f"Welcome back {user.username}!")
             return HttpResponseRedirect(reverse("projects:index"))
         else:
-            return render(
-                request,
-                "projects/login.html",
-                {"message": "Invalid username or password"},
-            )
+            messages.error(request, "Invalid username or password")
+            return render(request, "accounts/login.html")
     else:
-        return render(request, "projects/login.html")
+        return render(request, "accounts/login.html")
 
 
 # Logout user
 def logout_view(request):
     logout(request)
+    messages.info(request, "You have been logged out successfully.")
     return HttpResponseRedirect(reverse("projects:index"))
 
 
@@ -44,30 +45,31 @@ def register(request):
     if request.method == "POST":
         email = request.POST["email"]
         username = request.POST["username"]
-
-        # password validate
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
-        if not password == confirmation:
-            return render(
-                request, "projects/register.html", {"message": "Password must match."}
-            )
+
+        # password validate
+        if password != confirmation:
+            messages.warning(request, "Passwords do not match.")
+            return render(request, "accounts/register.html")
 
         # Create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
+            messages.error(request, "That username is already taken.")
             return render(
                 request,
-                "projects/register.html",
-                {"message": "Username already taken."},
+                "accounts/register.html",
             )
+
+        # Logged the user in
         login(request, user)
+        messages.success(request, "Your account has been created successfully!")
         return HttpResponseRedirect(reverse("projects:index"))
     else:
-        return render(request, "projects/register.html")
-
+        return render(request, "accounts/register.html")
 
 
 # User dashboard
@@ -85,7 +87,7 @@ def dashboard(request, username):
     # Render user dashboard
     return render(
         request,
-        "projects/dashboard.html",
+        "accounts/dashboard.html",
         {
             "projects": projects,
             "profile": user.serializer(),
@@ -93,28 +95,31 @@ def dashboard(request, username):
         },
     )
 
+
 # Update user image
 @csrf_exempt
 @login_required
 def update_photo(request):
     if request.method != "POST":
-        return JsonResponse({"error": "POST request is required."})
+        return JsonResponse({"error": "POST request is required."}, status=400)
 
     # Get the image file from the client-side
     image = request.FILES.get("photo")
-    if image:
-        from PIL import Image
+    if not image:
+        return JsonResponse({"error": "No image file provided."}, status=400)
 
-        try:
-            with Image.open(image):
-                request.user.photo = image
-                request.user.save()
-        except OSError:
-            return JsonResponse({"error": "Unsupported file."})
-        return JsonResponse({"message": "Image uploaded sucessfully."}, status=200)
+    from PIL import Image
+
+    try:
+        with Image.open(image):
+            request.user.photo = image
+            request.user.save()
+            return JsonResponse({"message": "Image uploaded successfully."}, status=200)
+    except OSError:
+        return JsonResponse({"error": "Unsupported file."}, status=400)
 
 
-# Following system 
+# Following system
 @csrf_exempt
 @login_required
 def follow(request, pk):
@@ -123,17 +128,17 @@ def follow(request, pk):
 
     # Handle follow/unfollow action
     user = get_object_or_404(User, pk=pk)
-    if user is not request.user:
-        if request.user in user.followers.all():
-            user.followers.remove(request.user)
-            return JsonResponse(
-                {"message": "Unfollowed", "followers": user.followers.count()},
-                status=200,
-            )
-        else:
-            user.followers.add(request.user)
-            return JsonResponse(
-                {"message": "Followed", "followers": user.followers.count()}, status=200
-            )
+    if user == request.user:
+        return JsonResponse({"error": "You cannot follow yourself."}, status=400)
+
+    if request.user in user.followers.all():
+        user.followers.remove(request.user)
+        return JsonResponse(
+            {"message": "Unfollowed", "followers": user.followers.count()},
+            status=200,
+        )
     else:
-        return JsonResponse({"message": "Cannot follow yourself."}, status=400)
+        user.followers.add(request.user)
+        return JsonResponse(
+            {"message": "Followed", "followers": user.followers.count()}, status=200
+        )

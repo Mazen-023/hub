@@ -4,14 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from .forms import ProjectForm
 
 from .models import Project, Technology, Review
 
+
 # Feed Page
 def index(request):
-    # Get all public projects, excluding the current user's if authenticated
     projects = Project.objects.filter(is_public=True)
     if request.user.is_authenticated:
         projects = projects.exclude(owner=request.user)
@@ -31,18 +32,19 @@ def create(request):
             project.save()
 
             # Process technologies
-            tech_string = form.cleaned_data.get("technologies", "")
-            if tech_string:
-                tech_names = [
-                    name.strip() for name in tech_string.split(",") if name.strip()
+            technologies = form.cleaned_data.get("technologies", "")
+            if technologies:
+                skills = [
+                    name.strip() for name in technologies.split(",") if name.strip()
                 ]
-                for name in tech_names:
-                    tech, created = Technology.objects.get_or_create(name=name)
-                    project.technologies.add(tech)
+                for name in skills:
+                    technology, created = Technology.objects.get_or_create(name=name)
+                    project.technologies.add(technology)
 
-            return HttpResponseRedirect(
-                reverse("projects:project_detail", args=[project.id])
+            messages.success(
+                request, f"Project '{project.title}' have been created successfully!"
             )
+            return HttpResponseRedirect(reverse("projects:detail", args=[project.id]))
     else:
         # For GET requests, show empty form
         form = ProjectForm()
@@ -66,26 +68,29 @@ def update(request, pk):
 
             # Process technologies
             project.technologies.clear()
-            tech_string = form.cleaned_data.get("technologies", "")
-            if tech_string:
-                tech_names = [
-                    name.strip() for name in tech_string.split(",") if name.strip()
+            technologies = form.cleaned_data.get("technologies", "")
+            if technologies:
+                skills = [
+                    name.strip() for name in technologies.split(",") if name.strip()
                 ]
-                for name in tech_names:
-                    tech, created = Technology.objects.get_or_create(name=name)
-                    project.technologies.add(tech)
+                for name in skills:
+                    technology, created = Technology.objects.get_or_create(name=name)
+                    project.technologies.add(technology)
 
-            return HttpResponseRedirect(
-                reverse("projects:project_detail", args=[project.id])
+            messages.success(
+                request, f"Project '{project.title}' was updated successfully!"
             )
+            return HttpResponseRedirect(reverse("projects:detail", args=[project.id]))
     else:
-        initial_data = {
+        technologies = {
             "technologies": ", ".join(
                 [tech.name for tech in project.technologies.all()]
             )
         }
-        form = ProjectForm(instance=project, initial=initial_data)
-        return render(request, "projects/update.html", {"form": form, "project": project})
+        form = ProjectForm(instance=project, initial=technologies)
+        return render(
+            request, "projects/update.html", {"form": form, "project": project}
+        )
 
 
 # Delete existing project
@@ -106,11 +111,17 @@ def detail(request, pk):
     # Get project
     project = get_object_or_404(Project, pk=pk)
 
+    # Return a 403 Forbidden error if they don't have permission.
+    if not project.is_public and request.user != project.owner:
+        return HttpResponse(
+            "You do not have permission to view this project.", status=403
+        )
+
     # Add unique viewer if they are not the owner
     if request.user not in project.viewers.all() and request.user != project.owner:
         project.viewers.add(request.user)
 
-    return render(request, "projects/project_detail.html", {"project": project})
+    return render(request, "projects/detail.html", {"project": project})
 
 
 @csrf_exempt

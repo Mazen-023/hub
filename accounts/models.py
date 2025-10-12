@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 # User entity
 class User(AbstractUser):
     photo = models.ImageField(blank=True, upload_to="media")
