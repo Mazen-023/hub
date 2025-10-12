@@ -20,7 +20,7 @@
 
                         <!-- Outer card -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{% url 'projects:dashboard' project.owner.username %}" class="text-decoration-none">
+                            <a href="{% url 'accounts:dashboard' project.owner.username %}" class="text-decoration-none">
                                 <div class="d-flex align-items-center">
                                     {% if project.owner.photo %}
                                         <img src="{{ project.owner.photo.url }}" alt="{{ project.owner.username }} photo"

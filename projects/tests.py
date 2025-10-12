@@ -1,7 +1,8 @@
 from django.test import TestCase
 
-from .models import User, Project, Technology, Review
+from .models import Project, Technology, Review
 
+from accounts.models import User
 
 class ProjectTestCase(TestCase):
     def setUp(self):
@@ -28,11 +29,6 @@ class ProjectTestCase(TestCase):
         Review.objects.create(user=bar, project=project, content="test2 review")
         Review.objects.create(user=baz, project=project, content="test2 review")
 
-        # Set up followers
-        foo.following.add(foo)
-        bar.following.add(baz)
-        baz.following.add(bar)
-
         # Add technologies
         project.technologies.add(tech1)
         project.technologies.add(tech2)
@@ -45,15 +41,6 @@ class ProjectTestCase(TestCase):
         project.stars.add(baz)
         project.stars.add(bar)
 
-    def test_valid_follower(self):
-        """User is NOT following themselves, should be valid."""
-        user = User.objects.get(username="baz")
-        self.assertTrue(user.is_valid_follower())
-
-    def test_invalid_follower(self):
-        """User is following themselves, should be invalid."""
-        user = User.objects.get(username="foo")
-        self.assertFalse(user.is_valid_follower())
 
     def test_ownership(self):
         """User own a project"""

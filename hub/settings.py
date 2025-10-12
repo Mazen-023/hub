@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "accounts",
     "projects",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -80,7 +81,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "projects.User"
+AUTH_USER_MODEL = "accounts.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -128,4 +129,4 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR
 
 # URL for login page
-LOGIN_URL = "projects:login"
+LOGIN_URL = "accounts:login"

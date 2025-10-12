@@ -55,13 +55,13 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'projects:dashboard' user.username %}">Dashboard</a>
+                                    <a class="dropdown-item" href="{% url 'accounts:dashboard' user.username %}">Dashboard</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'projects:logout' %}">
+                                    <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
                                         <i class="bi bi-box-arrow-right me-2"></i>Logout
                                     </a>
                                 </li>
@@ -71,12 +71,12 @@
                 {% else %}
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="{% url 'projects:login' %}">
+                            <a class="nav-link fw-medium" href="{% url 'accounts:login' %}">
                                 <i class="bi bi-box-arrow-in-right me-1"></i>Login
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="{% url 'projects:register' %}">
+                            <a class="nav-link fw-medium" href="{% url 'accounts:register' %}">
                                 <i class="bi bi-person-plus me-1"></i>Register
                             </a>
                         </li>
