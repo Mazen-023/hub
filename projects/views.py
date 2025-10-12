@@ -7,10 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Review, User, Project, Tech
-
-
-# Create your views here.
+from .models import User, Project, Tech, Review
 
 
 # Feed Page
@@ -28,7 +25,12 @@ def index(request):
 def create(request):
     if request.method == "POST":
         # Get project data
-        title = request.POST["title"]
+        title = request.POST.get("title")
+        if not title:
+            return render(
+                request, "projects/create.html", {"error": "Title field is required."}
+            )
+
         overview = request.POST["overview"]
         description = request.POST["description"]
         video_url = request.POST["video"]
@@ -130,13 +132,7 @@ def update(request, id):
 def delete(request, id):
     if request.method == "DELETE":
         project = get_object_or_404(Project, id=id, owner=request.user)
-
-        # Delete related tech objects
-        Tech.objects.filter(project=project).delete()
-
-        # Delete the project
         project.delete()
-
         return HttpResponse(status=204)
     else:
         return JsonResponse({"error": "DELETE request required."}, status=400)
@@ -146,80 +142,43 @@ def delete(request, id):
 @login_required
 def project_detail(request, id):
     # Get project
-    try:
-        project = Project.objects.get(id=id)
-    except Project.DoesNotExist:
-        return render(
-            request,
-            "projects/project_detail.html",
-            {"message": "Project doesn't exist"},
-        )
+    project = get_object_or_404(Project, id=id)
 
-    # Get tech by project
-    techs = Tech.objects.filter(project=project)
-
-    # Add unique authenticated viewer if they are not the owner
-    if (
-        request.user.is_authenticated
-        and request.user != project.owner
-        and project.is_public
-    ):
+    # Add unique viewer if they are not the owner
+    if request.user not in project.viewers.all() and request.user != project.owner:
         project.viewers.add(request.user)
 
-    # Get project reviews
-    reviews = Review.objects.filter(project=id)
-
-    return render(
-        request,
-        "projects/project_detail.html",
-        {
-            "project": project,
-            "key_learning": project.key_learning.splitlines(),
-            "objectives": project.objectives.splitlines(),
-            "techs": techs,
-            "reviews": reviews,
-        },
-    )
+    return render(request, "projects/project_detail.html", {"project": project})
 
 
 @csrf_exempt
 @login_required
 def review(request, project_id):
     if request.method != "POST":
-        return JsonResponse({"error": "POST request is required."})
+        return JsonResponse({"error": "POST request is required."}, status=400)
 
-    # Current project
-    project = Project.objects.get(pk=project_id)
-    if not project:
-        return JsonResponse({"error": "Project Not Found."})
+    # Get the project or return a 404 error
+    project = get_object_or_404(Project, pk=project_id)
 
-    # Load request content
+    # Load and validate the review content
     data = json.loads(request.body)
-    if not data.get("content"):
-        return JsonResponse({"message": "Empty review not allowed"})
+    content = data.get("content")
+    if not content or len(content) > 1000:
+        return JsonResponse(
+            {"error": "Review must be between 1 and 1000 characters."}, status=400
+        )
 
-    # Create new review
-    review = Review.objects.create(
-        user=request.user, project=project, content=data.get("content")
-    )
-    review.save()
+    # Create the new review
+    Review.objects.create(user=request.user, project=project, content=content)
 
-    # Return new content
-    return JsonResponse(
-        {"message": "Comment added successfully.", "content": review.content},
-        status=201,
-    )
+    # Return a success response
+    return JsonResponse({"message": "Review added successfully."}, status=201)
 
 
 @login_required
 def dashboard(request, username):
     # Get user object
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return render(
-            request, "projects/dashbaord.html", {"message": "user is not exist"}
-        )
+    user = get_object_or_404(User, username=username)
 
     # Get user projects
     projects = Project.objects.filter(owner=user)
@@ -246,13 +205,17 @@ def update_photo(request):
         return JsonResponse({"error": "POST request is required."})
 
     # Get the image file from the client-side
-    image = request.FILES["photo"]
+    image = request.FILES.get("photo")
+    if image:
+        from PIL import Image
 
-    # Save the user image
-    request.user.photo = image
-    request.user.save()
-
-    return JsonResponse({"message": "Image uploaded sucessfully."}, status=200)
+        try:
+            with Image.open(image):
+                request.user.photo = image
+                request.user.save()
+        except OSError:
+            return JsonResponse({"error": "Unsupported file."})
+        return JsonResponse({"message": "Image uploaded sucessfully."}, status=200)
 
 
 @csrf_exempt
@@ -262,22 +225,21 @@ def follow(request, user_id):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Handle follow/unfollow action
-    user = User.objects.get(pk=user_id)
-    if request.user in user.followers.all():
-        user.followers.remove(request.user)
-        user.save()
-        return JsonResponse(
-            {"message": "Unfollowed", "followers": user.followers.count()}, status=200
-        )
-    else:
-        if user != request.user:
+    user = get_object_or_404(User, pk=user_id)
+    if user is not request.user:
+        if request.user in user.followers.all():
+            user.followers.remove(request.user)
+            return JsonResponse(
+                {"message": "Unfollowed", "followers": user.followers.count()},
+                status=200,
+            )
+        else:
             user.followers.add(request.user)
-            user.save()
             return JsonResponse(
                 {"message": "Followed", "followers": user.followers.count()}, status=200
             )
-        else:
-            return JsonResponse({"message": "Cannot follow yourself."}, status=400)
+    else:
+        return JsonResponse({"message": "Cannot follow yourself."}, status=400)
 
 
 @csrf_exempt
@@ -287,24 +249,20 @@ def star(request, project_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    if request.user.is_authenticated:
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return JsonResponse({"error": "Project not found."}, status=404)
+    # Check if the project exists
+    project = get_object_or_404(Project, pk=project_id)
 
-        if request.user in project.stars.all():
-            project.stars.remove(request.user)
-            return JsonResponse(
-                {"starred": False, "count": project.stars.count()}, status=200
-            )
-        else:
-            project.stars.add(request.user)
-            return JsonResponse(
-                {"starred": True, "count": project.stars.count()}, status=200
-            )
+    # Toggle between star and starred
+    if request.user in project.stars.all():
+        project.stars.remove(request.user)
+        return JsonResponse(
+            {"starred": False, "count": project.stars.count()}, status=200
+        )
     else:
-        return JsonResponse({"error": "User not authenticated."}, status=403)
+        project.stars.add(request.user)
+        return JsonResponse(
+            {"starred": True, "count": project.stars.count()}, status=200
+        )
 
 
 @csrf_exempt
@@ -312,10 +270,16 @@ def star(request, project_id):
 def visibility(request, project_id):
     # Allow only PUT request
     if request.method != "PUT":
-        return JsonResponse({"error": "PUT request required."})
+        return JsonResponse({"error": "PUT request required."}, status=405)
 
     # Get the current project
-    project = Project.objects.get(pk=project_id)
+    project = get_object_or_404(Project, pk=project_id)
+
+    # Check if the request user is the owner
+    if not request.user == project.owner:
+        return JsonResponse(
+            {"error": "You don't have permission to edit this project"}, status=403
+        )
 
     # access request body
     data = json.loads(request.body)

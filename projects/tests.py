@@ -3,9 +3,6 @@ from django.test import TestCase
 from .models import User, Project, Tech
 
 
-# Create your tests here.
-
-
 class ProjectTestCase(TestCase):
     def setUp(self):
         # Create user
