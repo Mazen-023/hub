@@ -7,7 +7,9 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import User, Project, Tech, Review
+from .forms import ProjectForm
+
+from .models import User, Project, Technology, Review
 
 
 # Feed Page
@@ -24,51 +26,30 @@ def index(request):
 @login_required
 def create(request):
     if request.method == "POST":
-        # Get project data
-        title = request.POST.get("title")
-        if not title:
-            return render(
-                request, "projects/create.html", {"error": "Title field is required."}
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.owner = request.user
+            project.is_public = form.cleaned_data["is_public"] == "True"
+            project.save()
+
+            # Process technologies
+            tech_string = form.cleaned_data.get("technologies", "")
+            if tech_string:
+                tech_names = [
+                    name.strip() for name in tech_string.split(",") if name.strip()
+                ]
+                for name in tech_names:
+                    tech, created = Technology.objects.get_or_create(name=name)
+                    project.technologies.add(tech)
+
+            return HttpResponseRedirect(
+                reverse("projects:project_detail", args=[project.id])
             )
-
-        overview = request.POST["overview"]
-        description = request.POST["description"]
-        video_url = request.POST["video"]
-        github_url = request.POST["github"]
-        image = request.FILES.get("file")
-        objectives = request.POST["objectives"]
-        key_learning = request.POST["key_learning"]
-        status = request.POST["status"]
-
-        # Get tech data
-        tech = request.POST["tech"]
-
-        # Save project data
-        project = Project.objects.create(
-            owner=request.user,
-            title=title,
-            overview=overview,
-            description=description,
-            video_url=video_url,
-            github_url=github_url,
-            image=image,
-            objectives=objectives,
-            key_learning=key_learning,
-            is_public=True if status == "public" else False,
-        )
-
-        # save tech data
-        skills = tech.split(",")
-        for name in skills:
-            if name.strip():
-                Tech.objects.create(project=project, name=name.strip())
-
-        return HttpResponseRedirect(
-            reverse("projects:project_detail", args=[project.id])
-        )
-
     else:
-        return render(request, "projects/create.html")
+        # For GET requests, show empty form
+        form = ProjectForm()
+        return render(request, "projects/create.html", {"form": form})
 
 
 # Update existing project
@@ -77,53 +58,38 @@ def update(request, id):
     # Get the project and verify ownership
     project = get_object_or_404(Project, id=id, owner=request.user)
 
-    # Get associated techs
-    techs = Tech.objects.filter(project=project)
-    tech_string = ", ".join([tech.name for tech in techs])
-
     if request.method == "POST":
-        # Get updated project data
-        title = request.POST["title"]
-        overview = request.POST["overview"]
-        description = request.POST["description"]
-        video_url = request.POST["video"]
-        github_url = request.POST["github"]
-        objectives = request.POST["objectives"]
-        key_learning = request.POST["key_learning"]
-        status = request.POST["status"]
+        # Initialize form with POST data, FILES and existing project instance
+        form = ProjectForm(request.POST, request.FILES, instance=project)
 
-        # Update image only if a new one is provided
-        if "file" in request.FILES:
-            project.image = request.FILES["file"]
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.is_public = form.cleaned_data["is_public"] == "True"
+            project.save()
 
-        # Update project fields
-        project.title = title
-        project.overview = overview
-        project.description = description
-        project.video_url = video_url
-        project.github_url = github_url
-        project.objectives = objectives
-        project.key_learning = key_learning
-        project.is_public = True if status == "public" else False
-        project.save()
+            # Process technologies
+            project.technologies.clear()
+            tech_string = form.cleaned_data.get("technologies", "")
+            if tech_string:
+                tech_names = [
+                    name.strip() for name in tech_string.split(",") if name.strip()
+                ]
+                for name in tech_names:
+                    tech, created = Technology.objects.get_or_create(name=name)
+                    project.technologies.add(tech)
 
-        # Update tech data - delete existing and create new
-        Tech.objects.filter(project=project).delete()
-        skills = request.POST["tech"].split(",")
-        for name in skills:
-            if name.strip():
-                Tech.objects.create(project=project, name=name.strip())
-
-        return HttpResponseRedirect(
-            reverse("projects:project_detail", args=[project.id])
-        )
+            return HttpResponseRedirect(
+                reverse("projects:project_detail", args=[project.id])
+            )
     else:
-        # For GET request, show form with existing data
-        return render(
-            request,
-            "projects/update.html",
-            {"project": project, "tech_string": tech_string},
-        )
+        initial_data = {
+            "technologies": ", ".join(
+                [tech.name for tech in project.technologies.all()]
+            )
+        }
+        form = ProjectForm(instance=project, initial=initial_data)
+
+    return render(request, "projects/update.html", {"form": form, "project": project})
 
 
 # Delete existing project

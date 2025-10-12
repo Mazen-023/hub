@@ -185,7 +185,7 @@
                                 </h6>
                             </div>
                             <div class="card-body">
-                                {% for tech in project.tech.all %}
+                                {% for tech in project.technologies.all %}
                                     <span class="badge bg-secondary me-1 mb-1">{{ tech.name }}</span>
                                 {% empty %}
                                     <p class="text-muted mb-0">No technologies listed</p>

@@ -2,74 +2,109 @@
 {% load static %}
 
 {% block main %}
-    <div class="container mt-3">        
-        <form action="{% url 'projects:update' project.id %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                <label for="title" class="form-label">Project Title</label>
-                <input type="text" class="form-control" id="title" name="title" value="{{ project.title }}" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="overview" class="form-label">Overview</label>
-                <textarea class="form-control" id="overview" name="overview" rows="2">{{ project.overview }}</textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="5">{{ project.description }}</textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label for="objectives" class="form-label">Objectives (One per line)</label>
-                <textarea class="form-control" id="objectives" name="objectives" rows="3">{{ project.objectives }}</textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label for="key_learning" class="form-label">Key Learnings (One per line)</label>
-                <textarea class="form-control" id="key_learning" name="key_learning" rows="3">{{ project.key_learning }}</textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label for="tech" class="form-label">Technologies (Comma separated)</label>
-                <input type="text" class="form-control" id="tech" name="tech" value="{{ tech_string }}">
-            </div>
-            
-            <div class="mb-3">
-                <label for="video" class="form-label">Video URL (Optional)</label>
-                <input type="url" class="form-control" id="video" name="video" value="{{ project.video_url }}">
+<div class="container mt-3">
+    <form action="{% url 'projects:update' project.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="{{ form.title.id_for_label }}" class="form-label">Project Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="invalid-feedback d-block">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.overview.id_for_label }}" class="form-label">Overview</label>
+            {{ form.overview }}
+            {% if form.overview.errors %}
+                <div class="invalid-feedback d-block">{{ form.overview.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.objectives.id_for_label }}" class="form-label">Objectives</label>
+            {{ form.objectives }}
+            {% if form.objectives.errors %}
+                <div class="invalid-feedback d-block">{{ form.objectives.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.key_learning.id_for_label }}" class="form-label">Key Learnings</label>
+            {{ form.key_learning }}
+            {% if form.key_learning.errors %}
+                <div class="invalid-feedback d-block">{{ form.key_learning.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.technologies.id_for_label }}" class="form-label">Technologies (Comma separated)</label>
+            {{ form.technologies }}
+            {% if form.technologies.errors %}
+                <div class="invalid-feedback d-block">{{ form.technologies.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.video_url.id_for_label }}" class="form-label">Video URL (Optional)</label>
+            {{ form.video_url }}
+            {% if form.video_url.errors %}
+                <div class="invalid-feedback d-block">{{ form.video_url.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.github_url.id_for_label }}" class="form-label">GitHub Repository URL (Optional)</label>
+            {{ form.github_url }}
+            {% if form.github_url.errors %}
+                <div class="invalid-feedback d-block">{{ form.github_url.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Project Image</label>
+            {% if project.image %}
+                <div class="mb-2">
+                    <img src="{{ project.image.url }}" class="img-thumbnail" style="max-height: 150px;"
+                        alt="Current project image">
+                </div>
+            {% endif %}
+
+            <div class="input-group">
+                <input type="file" name="image" class="form-control" id="id_image" accept="image/*">
+                {% if project.image %}
+                    <div class="form-check ms-3 mt-1">
+                        <input type="checkbox" name="image-clear" id="image-clear_id" class="form-check-input">
+                        <label class="form-check-label" for="image-clear_id">Remove current image</label>
+                    </div>
+                {% endif %}
             </div>
 
-            <div class="mb-3">
-                <label for="github" class="form-label">GitHub Repository URL (Optional)</label>
-                <input type="url" class="form-control" id="github" name="github" value="{{ project.github_url }}">
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Current Image</label>
-                {% if project.image %}
-                    <div class="mb-2">
-                        <img src="{{ project.image.url }}" alt="Current project image" style="max-height: 200px;" class="img-thumbnail">
-                    </div>
-                {% else %}
-                    <p>No image currently uploaded</p>
-                {% endif %}
-                <label for="file" class="form-label">Upload New Image (Optional)</label>
-                <input type="file" class="form-control" id="file" name="file" accept="image/*">
-            </div>
-            
-            <div class="mb-3">
-                <label for="status" class="form-label">Project Visibility</label>
-                <select class="form-select" id="status" name="status">
-                    <option value="public" {% if project.is_public %}selected{% endif %}>Public</option>
-                    <option value="private" {% if not project.is_public %}selected{% endif %}>Private</option>
-                </select>
-            </div>
-            
-            <div class="d-grid gap-2 col-6 mx-auto mb-3">
-                <button type="submit" class="btn btn-primary">Update Project</button>
-            </div>
-        </form>
-    </div>
+            {% if form.image.errors %}
+                <div class="invalid-feedback d-block">{{ form.image.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.is_public.id_for_label }}" class="form-label">Project Visibility</label>
+            {{ form.is_public }}
+            {% if form.is_public.errors %}
+                <div class="invalid-feedback d-block">{{ form.is_public.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="d-grid gap-2 col-6 mx-auto mb-3">
+            <button type="submit" class="btn btn-primary">Update Project</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

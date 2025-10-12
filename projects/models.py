@@ -22,11 +22,19 @@ class User(AbstractUser):
         return not self.following.filter(pk=self.pk).exists()
 
 
+# Technology model related to a project
+class Technology(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 # Project created by a user
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField(max_length=255)
-    overview = models.CharField(max_length=100, blank=True)
+    overview = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     video_url = models.URLField(blank=True)
     github_url = models.URLField(blank=True)
@@ -34,6 +42,9 @@ class Project(models.Model):
     objectives = models.TextField(blank=True)
     key_learning = models.TextField(blank=True)
     is_public = models.BooleanField(default=True)
+    technologies = models.ManyToManyField(
+        Technology, related_name="projects", blank=True
+    )
     viewers = models.ManyToManyField(
         User, related_name="viewed_projects", blank=True, editable=False
     )
@@ -45,15 +56,6 @@ class Project(models.Model):
 
     def __str__(self):
         return f"project: {self.title}, created by {self.owner.username}."
-
-
-# Technolgoies related to a project
-class Tech(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tech")
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return f"{self.project.owner.username} have {self.name} skill."
 
 
 # User adds a review on a project
