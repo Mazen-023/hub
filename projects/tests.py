@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import User, Project, Tech
+from .models import User, Project, Technology, Review
 
 
 class ProjectTestCase(TestCase):
@@ -10,10 +10,9 @@ class ProjectTestCase(TestCase):
         bar = User.objects.create(username="bar")
         baz = User.objects.create(username="baz")
 
-        # Set up followers
-        foo.following.add(foo)
-        bar.following.add(baz)
-        baz.following.add(bar)
+        # Create Tech
+        tech1 = Technology.objects.create(name="Django")
+        tech2 = Technology.objects.create(name="React")
 
         # Create project
         project = Project.objects.create(owner=foo, title="test project 1")
@@ -24,6 +23,20 @@ class ProjectTestCase(TestCase):
             overview="project 2 overview",
         )
 
+        # Create review
+        Review.objects.create(user=foo, project=project, content="test1 review")
+        Review.objects.create(user=bar, project=project, content="test2 review")
+        Review.objects.create(user=baz, project=project, content="test2 review")
+
+        # Set up followers
+        foo.following.add(foo)
+        bar.following.add(baz)
+        baz.following.add(bar)
+
+        # Add technologies
+        project.technologies.add(tech1)
+        project.technologies.add(tech2)
+
         # Set up viewers
         project.viewers.add(baz)
         project.viewers.add(bar)
@@ -31,10 +44,6 @@ class ProjectTestCase(TestCase):
         # Set up stars
         project.stars.add(baz)
         project.stars.add(bar)
-
-        # Create Tech
-        Tech.objects.create(project=project, name="Django")
-        Tech.objects.create(project=project, name="React")
 
     def test_valid_follower(self):
         """User is NOT following themselves, should be valid."""
@@ -64,7 +73,7 @@ class ProjectTestCase(TestCase):
     def test_tech(self):
         """Check technologies related to a project."""
         project = Project.objects.get(title="test project 2")
-        techs = Tech.objects.filter(project=project)
+        techs = project.technologies.all()
         self.assertTrue(tech == ["Django", "React"] for tech in techs)
 
     def test_star(self):
@@ -78,3 +87,10 @@ class ProjectTestCase(TestCase):
         user = User.objects.get(username="foo")
         project = Project.objects.get(owner=user)
         self.assertTrue(project.viewers.count() == 2)
+
+    def test_review(self):
+        """Check project's review"""
+        foo = User.objects.get(username="foo")
+        project = Project.objects.get(owner=foo)
+        reviews = Review.objects.filter(project=project)
+        self.assertTrue(reviews.count() == 3)
