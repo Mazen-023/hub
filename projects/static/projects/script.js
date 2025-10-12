@@ -43,7 +43,7 @@ function delete_project(btn) {
             this.innerHTML = '<i class="bi bi-hourglass-split"></i>';
             this.disabled = true;
 
-            fetch(`/delete/${projectId}/`, {
+            fetch(`/project/${projectId}/delete/`, {
                 method: 'DELETE'
             })
             .then(response => {
@@ -72,7 +72,7 @@ function toggle_follow(userId) {
     btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
     btn.disabled = true;
 
-    fetch(`/follow/${userId}/`, {
+    fetch(`user/${userId}/follow/`, {
         method: 'POST'
     })
     .then(response => response.json())
@@ -103,7 +103,7 @@ function star(btn) {
         event.preventDefault();
         const projectId = this.dataset.id;
 
-        fetch(`/star/${projectId}/`, {
+        fetch(`/project/${projectId}/star/`, {
             method: 'POST'
         })
         .then(response => response.json())
@@ -135,7 +135,7 @@ function review() {
     project_id = document.getElementById('review-btn').dataset.id;
     content = document.getElementById('review').value;
 
-    fetch(`/reviews/${project_id}/`, {
+    fetch(`/project/${project_id}/reviews/`, {
         method: 'POST',
         body: JSON.stringify({
             content: content,
@@ -159,7 +159,7 @@ function upload_photo() {
     const formData = new FormData();
     formData.append('photo', image.files[0]);
 
-    fetch('/update_photo/', {
+    fetch('user/update_photo/', {
         method: 'POST',
         body: formData
     })
@@ -180,7 +180,7 @@ function change_visibility(select) {
         if(confirm('Confirm your request for project visibility')) {
             
             const projectId = this.dataset.id;
-            fetch(`/visibility/${projectId}/`, {
+            fetch(`/project/${projectId}/visibility/`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     visibility: this.value

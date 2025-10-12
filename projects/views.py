@@ -51,9 +51,9 @@ def create(request):
 
 # Update existing project
 @login_required
-def update(request, id):
+def update(request, pk):
     # Get the project and verify ownership
-    project = get_object_or_404(Project, id=id, owner=request.user)
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
 
     if request.method == "POST":
         # Initialize form with POST data, FILES and existing project instance
@@ -91,9 +91,9 @@ def update(request, id):
 # Delete existing project
 @csrf_exempt
 @login_required
-def delete(request, id):
+def delete(request, pk):
     if request.method == "DELETE":
-        project = get_object_or_404(Project, id=id, owner=request.user)
+        project = get_object_or_404(Project, pk=pk, owner=request.user)
         project.delete()
         return HttpResponse(status=204)
     else:
@@ -102,9 +102,9 @@ def delete(request, id):
 
 # Display project detail
 @login_required
-def project_detail(request, id):
+def detail(request, pk):
     # Get project
-    project = get_object_or_404(Project, id=id)
+    project = get_object_or_404(Project, pk=pk)
 
     # Add unique viewer if they are not the owner
     if request.user not in project.viewers.all() and request.user != project.owner:
@@ -115,12 +115,12 @@ def project_detail(request, id):
 
 @csrf_exempt
 @login_required
-def review(request, project_id):
+def reviews(request, pk):
     if request.method != "POST":
         return JsonResponse({"error": "POST request is required."}, status=400)
 
     # Get the project or return a 404 error
-    project = get_object_or_404(Project, pk=project_id)
+    project = get_object_or_404(Project, pk=pk)
 
     # Load and validate the review content
     data = json.loads(request.body)
@@ -139,13 +139,13 @@ def review(request, project_id):
 
 @csrf_exempt
 @login_required
-def star(request, project_id):
+def stars(request, pk):
     # Toggle star via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Check if the project exists
-    project = get_object_or_404(Project, pk=project_id)
+    project = get_object_or_404(Project, pk=pk)
 
     # Toggle between star and starred
     if request.user in project.stars.all():
@@ -162,13 +162,13 @@ def star(request, project_id):
 
 @csrf_exempt
 @login_required
-def visibility(request, project_id):
+def visibility(request, pk):
     # Allow only PUT request
     if request.method != "PUT":
         return JsonResponse({"error": "PUT request required."}, status=405)
 
     # Get the current project
-    project = get_object_or_404(Project, pk=project_id)
+    project = get_object_or_404(Project, pk=pk)
 
     # Check if the request user is the owner
     if not request.user == project.owner:

@@ -117,12 +117,12 @@ def update_photo(request):
 # Following system 
 @csrf_exempt
 @login_required
-def follow(request, user_id):
+def follow(request, pk):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Handle follow/unfollow action
-    user = get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(User, pk=pk)
     if user is not request.user:
         if request.user in user.followers.all():
             user.followers.remove(request.user)
