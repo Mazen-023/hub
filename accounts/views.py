@@ -13,8 +13,14 @@ from projects.models import Project
 from .models import User
 
 
-# Login existing user
 def login_view(request):
+    """
+    Authenticate and log in an existing user.
+
+    :param request: The HTTP request object containing user credentials.
+    :return: HttpResponseRedirect to index template on successful login.
+    :return: Rendered login template with error message on failure.
+    """
     if request.method == "POST":
         # Sign user in
         username = request.POST["username"]
@@ -33,15 +39,27 @@ def login_view(request):
         return render(request, "accounts/login.html")
 
 
-# Logout user
 def logout_view(request):
+    """
+    Log out the currently authenticated user.
+
+    :param request: The HTTP request object containing user session.
+    :return: HttpResponseRedirect to index template.
+    """
     logout(request)
     messages.info(request, "You have been logged out successfully.")
     return HttpResponseRedirect(reverse("projects:index"))
 
 
-# Register new user
 def register(request):
+    """
+    Create and register a new user account.
+
+    :param request: The HTTP request object containing registration data.
+    :raises IntegrityError: If the username is already taken.
+    :return: HttpResponseRedirect to index template on successful registration.
+    :return: Rendered register template with error message on failure.
+    """
     if request.method == "POST":
         email = request.POST["email"]
         username = request.POST["username"]
@@ -53,16 +71,13 @@ def register(request):
             messages.warning(request, "Passwords do not match.")
             return render(request, "accounts/register.html")
 
-        # Create new user
+        # Attemp to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
             messages.error(request, "That username is already taken.")
-            return render(
-                request,
-                "accounts/register.html",
-            )
+            return render(request, "accounts/register.html")
 
         # Logged the user in
         login(request, user)
@@ -72,9 +87,16 @@ def register(request):
         return render(request, "accounts/register.html")
 
 
-# User dashboard
 @login_required
 def dashboard(request, username):
+    """
+    Display user profile with their projects and following status.
+
+    :param request: The HTTP request object.
+    :param username (string): Username of the profile to display.
+    :raises Http404: If the user with the specified username doesn't exist.
+    :return: Rendered dashboard template with user projects and profile data.
+    """
     # Get user object
     user = get_object_or_404(User, username=username)
 
@@ -96,10 +118,17 @@ def dashboard(request, username):
     )
 
 
-# Update user image
 @csrf_exempt
 @login_required
 def update_photo(request):
+    """
+    Update the authenticated user's profile photo.
+
+    :param request: The HTTP request object containing the uploaded image.
+    :raises OSError: If the uploaded file is not a valid image.
+    :return: JsonResponse with success message and status 200 on success.
+    :return: JsonResponse with error message and status 400 on failure.
+    """
     if request.method != "POST":
         return JsonResponse({"error": "POST request is required."}, status=400)
 
@@ -108,9 +137,10 @@ def update_photo(request):
     if not image:
         return JsonResponse({"error": "No image file provided."}, status=400)
 
-    from PIL import Image
-
+    # Save image if it's valid
     try:
+        from PIL import Image
+
         with Image.open(image):
             request.user.photo = image
             request.user.save()
@@ -119,18 +149,26 @@ def update_photo(request):
         return JsonResponse({"error": "Unsupported file."}, status=400)
 
 
-# Following system
 @csrf_exempt
 @login_required
 def follow(request, pk):
+    """
+    Handle user follow/unfollow functionality.
+
+    :param request: The HTTP request objects containing user data.
+    :param pk (int): Primary key of the user to follow/unfollow.
+    :raises Http404: If the user with the specified pk doesn't exist.
+    :return: A JsonResponse Contains success/error message and updated followers count.
+    """
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    # Handle follow/unfollow action
+    # Validate current user
     user = get_object_or_404(User, pk=pk)
     if user == request.user:
         return JsonResponse({"error": "You cannot follow yourself."}, status=400)
 
+    # Handle follow/unfollow action
     if request.user in user.followers.all():
         user.followers.remove(request.user)
         return JsonResponse(

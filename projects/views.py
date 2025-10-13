@@ -11,8 +11,13 @@ from .forms import ProjectForm
 from .models import Project, Technology, Review
 
 
-# Feed Page
 def index(request):
+    """
+    Display public projects in the main feed.
+
+    :param request: The HTTP request object.
+    :return: Rendered index template with public projects.
+    """
     projects = Project.objects.filter(is_public=True)
     if request.user.is_authenticated:
         projects = projects.exclude(owner=request.user)
@@ -20,11 +25,21 @@ def index(request):
     return render(request, "projects/index.html", {"projects": projects})
 
 
-# Create new project
 @login_required
 def create(request):
+    """
+    Create a new project.
+
+    :param request: The HTTP request object containing project data.
+    :return: HttpResponseRedirect to project detail template on successful creation.
+    :return: Rendered create template with form on GET or validation errors.
+    """
+
+    # On POST request create new project
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES)
+
+        # Validate form data
         if form.is_valid():
             project = form.save(commit=False)
             project.owner = request.user
@@ -51,22 +66,33 @@ def create(request):
         return render(request, "projects/create.html", {"form": form})
 
 
-# Update existing project
 @login_required
 def update(request, pk):
+    """
+    Update an existing project.
+
+    :param request: The HTTP request object containing updated project data.
+    :param pk (int): Primary key of the project to update.
+    :raises Http404: If the project doesn't exist or user isn't the owner.
+    :return: HttpResponseRedirect to project detail template on successful update.
+    :return: Rendered update template with form on GET or validation errors.
+    """
     # Get the project and verify ownership
     project = get_object_or_404(Project, pk=pk, owner=request.user)
 
+    # On POST request update project data
     if request.method == "POST":
         # Initialize form with POST data, FILES and existing project instance
         form = ProjectForm(request.POST, request.FILES, instance=project)
 
+        # Check the form data is valid
         if form.is_valid():
+            # save the project data into database
             project = form.save(commit=False)
             project.is_public = form.cleaned_data["is_public"] == "True"
             project.save()
 
-            # Process technologies
+            # Update project's technologies
             project.technologies.clear()
             technologies = form.cleaned_data.get("technologies", "")
             if technologies:
@@ -93,22 +119,38 @@ def update(request, pk):
         )
 
 
-# Delete existing project
 @csrf_exempt
 @login_required
 def delete(request, pk):
-    if request.method == "DELETE":
-        project = get_object_or_404(Project, pk=pk, owner=request.user)
-        project.delete()
-        return HttpResponse(status=204)
-    else:
+    """
+    Delete an existing project.
+
+    :param request: The HTTP request object.
+    :param pk (int): Primary key of the project to delete.
+    :raises Http404: If the project doesn't exist or user isn't the owner.
+    :return: HttpResponse with status 204 on successful deletion.
+    :return: JsonResponse with error message on non-DELETE requests.
+    """
+    if request.method != "DELETE":
         return JsonResponse({"error": "DELETE request required."}, status=400)
 
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    project.delete()
+    return HttpResponse(status=204)
 
-# Display project detail
+
 @login_required
 def detail(request, pk):
-    # Get project
+    """
+    Display the details of a specific project.
+
+    :param request: The HTTP request object.
+    :param pk (int): Primary key of the project to display.
+    :raises Http404: If the project doesn't exist.
+    :return: HttpResponse with status 403 if user can't access the project.
+    :return: Rendered detail template with project data.
+    """
+    # Get project object
     project = get_object_or_404(Project, pk=pk)
 
     # Return a 403 Forbidden error if they don't have permission.
@@ -127,6 +169,16 @@ def detail(request, pk):
 @csrf_exempt
 @login_required
 def reviews(request, pk):
+    """
+    Add a review to a specific project.
+
+    :param request: The HTTP request object containing review content.
+    :param pk (int): Primary key of the project to review.
+    :raises Http404: If the project doesn't exist.
+    :return: JsonResponse with success message and status 201 on successful creation.
+    :return: JsonResponse with error message on failure or non-POST requests.
+    """
+    # Allow only POST request
     if request.method != "POST":
         return JsonResponse({"error": "POST request is required."}, status=400)
 
@@ -151,7 +203,16 @@ def reviews(request, pk):
 @csrf_exempt
 @login_required
 def stars(request, pk):
-    # Toggle star via POST
+    """
+    Toggle star status for a specific project.
+
+    :param request: The HTTP request object.
+    :param pk (int): Primary key of the project to star/unstar.
+    :raises Http404: If the project doesn't exist.
+    :return: JsonResponse with updated star status and count.
+    :return: JsonResponse with error message on non-POST requests.
+    """
+    # Allow only POST request
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -174,6 +235,15 @@ def stars(request, pk):
 @csrf_exempt
 @login_required
 def visibility(request, pk):
+    """
+    Change the visibility status of a project.
+
+    :param request: The HTTP request object containing visibility data.
+    :param pk (int): Primary key of the project to update.
+    :raises Http404: If the project doesn't exist.
+    :return: JsonResponse with success message and updated visibility status.
+    :return: JsonResponse with error message if user isn't the owner or on non-PUT requests.
+    """
     # Allow only PUT request
     if request.method != "PUT":
         return JsonResponse({"error": "PUT request required."}, status=405)
@@ -187,7 +257,7 @@ def visibility(request, pk):
             {"error": "You don't have permission to edit this project"}, status=403
         )
 
-    # access request body
+    # access request body data
     data = json.loads(request.body)
 
     # Change visibility
