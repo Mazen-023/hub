@@ -59,9 +59,10 @@ class ProjectTestCase(TestCase):
 
     def test_tech(self):
         """Check technologies related to a project."""
-        project = Project.objects.get(title="test project 2")
-        techs = project.technologies.all()
-        self.assertTrue(tech == ["Django", "React"] for tech in techs)
+        project = Project.objects.get(title="test project 1")
+        technologies = project.technologies.all()
+        self.assertTrue(technologies[0].name == "Django")
+        self.assertTrue(technologies[1].name == "React")
 
     def test_star(self):
         """Check if the project have stars"""

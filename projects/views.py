@@ -34,7 +34,6 @@ def create(request):
     :return: HttpResponseRedirect to project detail template on successful creation.
     :return: Rendered create template with form on GET or validation errors.
     """
-
     # On POST request create new project
     if request.method == "POST":
         form = ProjectForm(request.POST, request.FILES)
@@ -60,6 +59,8 @@ def create(request):
                 request, f"Project '{project.title}' have been created successfully!"
             )
             return HttpResponseRedirect(reverse("projects:detail", args=[project.id]))
+        else:
+            return render(request, "projects/create.html", {"form": form})
     else:
         # For GET requests, show empty form
         form = ProjectForm()
@@ -107,6 +108,10 @@ def update(request, pk):
                 request, f"Project '{project.title}' was updated successfully!"
             )
             return HttpResponseRedirect(reverse("projects:detail", args=[project.id]))
+        else:
+            return render(
+                request, "projects/update.html", {"form": form, "project": project}
+            )
     else:
         technologies = {
             "technologies": ", ".join(
