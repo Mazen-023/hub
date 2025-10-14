@@ -5,6 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.core.paginator import Paginator
+
 
 from .forms import ProjectForm
 
@@ -22,7 +24,11 @@ def index(request):
     if request.user.is_authenticated:
         projects = projects.exclude(owner=request.user)
 
-    return render(request, "projects/index.html", {"projects": projects})
+    # Pagination
+    page_number = request.GET.get("page")
+    paginator = Paginator(projects, 10)  # Show 10 contacts per page.
+    page_obj = paginator.get_page(page_number)
+    return render(request, "projects/index.html", {"page_obj": page_obj})
 
 
 @login_required
