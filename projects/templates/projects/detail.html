@@ -41,12 +41,12 @@
                                 <button class="btn btn-sm {% if user in project.stars.all %}btn-warning{% else %}btn-outline-secondary{% endif %} star-btn" data-id="{{ project.id }}">
                                     <i class="bi {% if user in project.stars.all %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                                     <span>Star</span>
-                                    <span id="star-count">{{ project.stars.count }}</span>
+                                    <span data-id="{{ project.id }}" class="star-count">{{ project.stars.count }}</span>
                                 </button>
                             {% else %}
                                 <div class="btn btn-sm btn-outline-secondary disabled">
                                     <i class="bi bi-star-fill text-warning"></i>
-                                    <span id="star-count">{{ project.stars.count }}</span>
+                                    <span data-id="{{ project.id }}" class="star-count">{{ project.stars.count }}</span>
                                 </div>
                             {% endif %}
 
@@ -150,7 +150,7 @@
                             <label for="review" class="form-label fw-semibold">Add Review</label>
                             <div class="input-group">
                                 <input type="text" name="review" class="form-control" id="review" placeholder="Review this project..." required>
-                                <button class="btn btn-warning text-white" data-id="{{ project.id }}" id="review-btn">Add Review</button>
+                                <em class="btn btn-warning text-white" data-id="{{ project.id }}" id="review-btn">Add Review</em>
                             </div>
                         </div>
                         

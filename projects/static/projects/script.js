@@ -13,7 +13,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Star Feature
-    document.querySelectorAll('.star-btn').forEach(button => { stars(button) });
+    document.querySelectorAll('.star-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            stars(this.dataset.id)
+        })
+    });
 
     // Review Feature
     const reviewBtn = document.querySelector('#review-btn');
@@ -102,36 +106,30 @@ function toggle_follow(userId) {
     });
 };
 
-function stars(btn) {
-    btn.addEventListener('click', function (event) {
-        event.preventDefault();
-        const projectId = this.dataset.id;
+function stars(projectId) {
+    fetch(`/project/${projectId}/stars/`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(result => {
+        console.log(result);
 
-        fetch(`/project/${projectId}/stars/`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log(result);
-
-            // Update button appearance based on the new star status
-            if (result.starred) {
-                this.classList.replace('btn-outline-secondary', 'btn-warning');
-                this.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
-            } else {
-                this.classList.replace('btn-warning', 'btn-outline-secondary');
-                this.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
-            }
-            
-            // Update only the star count on this specific button
-            const countElement = document.querySelector('#star-count');
-            if (countElement) {
-                countElement.textContent = result.count;
-            }
-        })
-        .catch(error => {
-            console.log('Error:', error);
-        });
+        btn = document.querySelector(`button[data-id="${projectId}"]`)
+        
+        // Update button appearance based on the new star status
+        if (result.starred) {
+            btn.classList.replace('btn-outline-secondary', 'btn-warning');
+            btn.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
+        } else {
+            btn.classList.replace('btn-warning', 'btn-outline-secondary');
+            btn.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
+        }
+        
+        // Update the star count
+        document.querySelector(`.star-count[data-id="${projectId}"]`).textContent = result.count;
+    })
+    .catch(error => {
+        console.log('Error:', error);
     });
 };
 

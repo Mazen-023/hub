@@ -26,7 +26,7 @@ def index(request):
 
     # Pagination
     page_number = request.GET.get("page")
-    paginator = Paginator(projects, 10)  # Show 10 contacts per page.
+    paginator = Paginator(projects, 10)  # Show 10 projects per page.
     page_obj = paginator.get_page(page_number)
     return render(request, "projects/index.html", {"page_obj": page_obj})
 
