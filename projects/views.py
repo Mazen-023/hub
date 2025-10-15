@@ -164,11 +164,9 @@ def detail(request, pk):
     # Get project object
     project = get_object_or_404(Project, pk=pk)
 
-    # Return a 403 Forbidden error if they don't have permission.
+    # Check project visibility.
     if not project.is_public and request.user != project.owner:
-        return HttpResponse(
-            "You do not have permission to view this project.", status=403
-        )
+        return render(request, "projects/detail.html")
 
     # Add unique viewer if they are not the owner
     if request.user not in project.viewers.all() and request.user != project.owner:

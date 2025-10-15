@@ -74,8 +74,7 @@ From a technical perspective, DevHub demonstrates substantial complexity through
 - URL patterns for all project functionality and AJAX operations.
 
 **Forms**: Include project-related forms:
-- `ProjectForm`: Custom `ModelForm` handling technology input  
-- Includes clean methods for proper validation
+- `ProjectForm`: a form that handles input validation for both create and update operations, built from our project entity model.
 
 **Tests**: Include project-related tests:
 Validates:
@@ -86,7 +85,7 @@ Validates:
 **Templates**: Include project-related templates:
 - `index.html`: Responsive project feed  
 - `create.html` / `update.html`: Submission forms  
-- `detail.html`: Project view with media and reviews  
+- `detail.html`: The core template that shows the user's project details in a structured way
 
 **Script.js**: Include project-related JavaScript:
 - Manages all AJAX interactions and dynamic UI updates
