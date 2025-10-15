@@ -1,6 +1,6 @@
 # DevHub Application
 
-#### Video Demo: [Watch here](https://youtu.be/yO-s3zidRkw)
+#### Video Demo: [Watch here](https://youtu.be/BZ5xcTF5dFM)
 
 ---
 
@@ -61,7 +61,7 @@ From a technical perspective, DevHub demonstrates substantial complexity through
 - `Review`: users review on a project
 
 **Views**: Include project-related views:
-- `index`: Displays feed of public projects  
+- `index`: Displays feed of public projects with pagination feature
 - `create`: Handles new project submissions
 - `update`: Modifies existing projects  
 - `delete`: Removes projects  

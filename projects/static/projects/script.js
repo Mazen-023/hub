@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const followBtn = document.querySelector('#toggle_follow');
     if (followBtn) {
         followBtn.addEventListener('click', function () {
-            const userId = this.dataset.user;
-            toggle_follow(userId);
+            toggle_follow(this.dataset.user);
         });
     }
 
