@@ -14,7 +14,7 @@ DevHub integrates concepts and functionalities from previous CS50 projects into 
 
 From a technical perspective, DevHub demonstrates substantial complexity through the integration of multiple Django models **User**, **Project**, **Review**, and **Technology** which are interconnected using several Many-to-Many relationships to ensure scalability and data consistency. The application also employs custom JavaScript functions. These functions enable asynchronous operations, including project starring, review submission, project deletion, user image updates, visibility toggling, and follow/unfollow interactions, thereby enhancing responsiveness and user experience.
 
-![ER Diagram](ER_Diagram_DaqBpXh.png)
+![ER Diagram](ERDiagram.png)
 
 ---
 
