@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+env = '.env.prod' if os.getenv('PRODUCTION') else '.env.local'
+load_dotenv(env)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-5ky75u_j&_^h4wb%rz3t9#qt4l=vv-0ox-*x-3v3wl*ewca-=&"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "https://127.0.0.1:8000").split(",")
 
 # Application definition
 
@@ -76,8 +81,14 @@ WSGI_APPLICATION = "hub.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": f"django.db.backends.{
+            os.getenv("DATABASE_ENGINE", "sqlite3")
+        }",
+        "NAME": os.getenv("DATABASE_NAME",  BASE_DIR / "db.sqlite3"),
+        "USER": os.getenv("DATABASE_USER", "mydatabaseuser"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "mypassword"),
+        "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
+        "PORT": os.getenv("DATABASE_PORT", "5432"),
     }
 }
 
@@ -118,15 +129,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Configuration for storing images
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR
 
 # URL for login page
 LOGIN_URL = "accounts:login"
